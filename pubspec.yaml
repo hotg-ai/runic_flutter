@@ -31,7 +31,7 @@ dependencies:
   mic_stream: ^0.4.0
   camera: ^0.7.0
   image: ^2.1.19
-
+  searchfield: ^0.5.2
 
 
 dev_dependencies:

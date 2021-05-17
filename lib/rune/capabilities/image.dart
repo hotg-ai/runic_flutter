@@ -42,7 +42,7 @@ class ImageCapability {
 
   Uint8List reFormat(imglib.Image img) {
     imglib.Image thumbnail = imglib.copyResizeCropSquare(img, width);
-    if (format == 3) {
+    if (format >= 2) {
       thumbnail = imglib.grayscale(thumbnail);
       final p = thumbnail.getBytes();
       List<int> theBytes = [];
@@ -62,9 +62,9 @@ class ImageCapability {
       for (var i = 0; i < p.length; i += 4) {
         int pos = (i / 4).round();
         if (theBytes.length > pos * 3) {
-          theBytes[pos * 3] = p[i];
+          theBytes[pos * 3] = p[i + 2];
           theBytes[pos * 3 + 1] = p[i + 1];
-          theBytes[pos * 3 + 2] = p[i + 2];
+          theBytes[pos * 3 + 2] = p[i];
         } else {
           theBytes.add(p[i + 2]);
           theBytes.add(p[i + 1]);
