@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/sensors-0.4.2+6" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/runevm_fl-0.1.4" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

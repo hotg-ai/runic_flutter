@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:runevm_fl/runevm_fl.dart';
+import 'dart:convert' show utf8;
 
 const capabilitiesDefinition = {
   "1": "hmr::CAPABILITY::RAND",
@@ -33,7 +35,6 @@ class Runic {
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      print(">${response.body}<");
       runes = List<dynamic>.from(jsonDecode(response.body));
       print("Rune registry loaded:\n$runes");
     } else {
@@ -45,16 +46,22 @@ class Runic {
 
   List<Map<String, Object>>? output;
   Map capabilities = {};
+  Map parameters = {};
   String? modelOutput;
   String rawOutput = "";
   int wasmSize = 0;
+  bool loading = false;
 
-  Future<void> deployWASM(String urlString) async {
+  Future<void> deployWASM(String urlString, Function setState) async {
     //download
+    loading = true;
+    setState();
     Uint8List wasmBytes = await downloadWASM(
         'https://rune-registry.web.app/registry/' + urlString + '/app.rune');
-    await RunevmFl.loadWASM(wasmBytes);
+    await RunevmFl.load(wasmBytes);
     wasmSize = wasmBytes.length;
+    loading = false;
+    setState();
   }
 
   Future<Uint8List> downloadWASM(String urlString) async {
@@ -97,8 +104,21 @@ class Runic {
     dynamic result = "\"<MISSING>\"";
     int count = 0;
     int startMillisecond = new DateTime.now().millisecondsSinceEpoch;
-    while (count < 42 && result == "\"<MISSING>\"") {
+    while (count < 1 && result == "\"<MISSING>\"") {
       result = await RunevmFl.runRune(inputBytes);
+
+      try {
+        final outJson = json.decode(result);
+        if (outJson.containsKey("string")) {
+          rawOutput = "Result: ${outJson["string"]}";
+        } else if (outJson.containsKey("elements")) {
+          rawOutput = "Result: ${outJson["elements"]}";
+        } else {
+          rawOutput = "Raw output: $result";
+        }
+      } catch (e) {
+        rawOutput = "Raw output: $result";
+      }
       count++;
       print("retrying:$count |$result| ${result == "\"<MISSING>\""}");
     }
@@ -118,13 +138,30 @@ class Runic {
   Future<int> getManifest(String input) async {
     elements = [];
     capabilities = {};
-    final dynamic output = await RunevmFl.manifest;
-    if (output[0] is int) {
-      int capability = output[0];
-      capabilities["$capability"] = capabilitiesDefinition["$capability"];
-      print("Capability found: $capability ${capabilities["$capability"]}");
-      modelOutput = "SERIAL";
-      return capability;
+    try {
+      dynamic output = await RunevmFl.manifest;
+      if (Platform.isIOS) {
+        output = utf8.decode(List<int>.from(output));
+        print("mainfest output: $output");
+      }
+      output = json.decode(output);
+
+      if (output.length > 0) {
+        int capability = output[0]["capability"];
+        capabilities["$capability"] = capabilitiesDefinition["$capability"];
+        if (output[0].containsKey("parameters")) {
+          parameters["$capability"] = {};
+          for (dynamic parameter in output[0]["parameters"]) {
+            parameters["$capability"][parameter["key"]] = parameter["value"];
+          }
+        }
+        print("Capability found: $capability ${capabilities["$capability"]}");
+        print("with parameters: ${parameters["$capability"]}");
+        modelOutput = "SERIAL";
+        return capability;
+      }
+    } catch (e) {
+      print("Error reading manifest: $e");
     }
 
     return 0;

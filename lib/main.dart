@@ -85,7 +85,7 @@ class _RunicMainPageState extends State<RunicMainPage> {
     }
     controller = CameraController(
         cameras.length > cameraID ? cameras[cameraID] : cameras[0],
-        ResolutionPreset.medium);
+        ResolutionPreset.low);
     print("Init Camera");
 
     controller?.addListener(() {
@@ -102,7 +102,7 @@ class _RunicMainPageState extends State<RunicMainPage> {
           _running = true;
           Runic.inputData = _imageCap.processCameraImage(image);
           _running = false;
-          setState(() {});
+          //setState(() {});
         }
       });
       setState(() {
@@ -282,10 +282,23 @@ class _RunicMainPageState extends State<RunicMainPage> {
                   loading = true;
                 });
                 try {
-                  await _runic.deployWASM(currentRune["name"]);
+                  await _runic.deployWASM(currentRune["name"], () {
+                    setState(() {});
+                  });
                   try {
+                    print("_runic.getManifest: ");
                     await _runic.getManifest("manifest");
+                    print("_runic.getManifest: ${_runic.parameters}");
                     if (_runic.capabilities.containsKey("4")) {
+                      if (_runic.parameters["4"].containsKey("width") &&
+                          _runic.parameters["4"].containsKey("height") &&
+                          _runic.parameters["4"].containsKey("pixel_format")) {
+                        _imageCap = new ImageCapability(
+                            width: int.parse(_runic.parameters["4"]["width"]),
+                            height: int.parse(_runic.parameters["4"]["height"]),
+                            format: int.parse(
+                                _runic.parameters["4"]["pixel_format"]));
+                      }
                       initCamera(1);
                     }
 
@@ -322,21 +335,36 @@ class _RunicMainPageState extends State<RunicMainPage> {
         Container(
           width: 10,
         ),
-        Text(
-          _runic.wasmSize > 0
-              ? "Rune size: ${_runic.wasmSize}"
-              : "No Rune deployed",
-          style: TextStyle(
-              fontWeight: FontWeight.w300, fontSize: 12, color: Colors.white),
-        ),
-        Expanded(
-            child: _runic.wasmSize > 0
-                ? Container(
-                    child: Icon(
-                    Icons.check_circle,
-                    color: Colors.green,
-                  ))
-                : Container()),
+        (_runic.loading)
+            ? Container(
+                width: 21,
+                height: 21,
+                child: CircularProgressIndicator(color: Colors.white))
+            : Text(
+                _runic.wasmSize > 0
+                    ? "Rune size: ${_runic.wasmSize}"
+                    : "No Rune deployed",
+                style: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 12,
+                    color: Colors.white),
+              ),
+        (_runic.loading)
+            ? Text(
+                " Loading ",
+                style: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 12,
+                    color: Colors.white),
+              )
+            : Expanded(
+                child: _runic.wasmSize > 0
+                    ? Container(
+                        child: Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ))
+                    : Container()),
       ]),
     ];
     if (_runic.millisecondsPerRun > 0) {
@@ -373,10 +401,10 @@ class _RunicMainPageState extends State<RunicMainPage> {
             Expanded(
                 child: Center(
                     child: Container(
-                        height: 160,
+                        height: 220,
                         width: !(controller.value.isInitialized && mounted)
-                            ? 160
-                            : 1 / controller.value.aspectRatio * 160,
+                            ? 220
+                            : 1 / controller.value.aspectRatio * 220,
                         padding: const EdgeInsets.only(
                             right: 0.0, left: 0.0, top: 0, bottom: 0),
                         child: (controller.value.isInitialized && mounted)
@@ -440,7 +468,7 @@ class _RunicMainPageState extends State<RunicMainPage> {
               color: Color.fromRGBO(59, 188, 235, 1),
             ),
             title: Text(
-              "Raw Output: ${_runic.rawOutput}",
+              "${_runic.rawOutput}",
               style: TextStyle(color: Colors.white),
             )));
       }
@@ -704,6 +732,9 @@ class _RunicMainPageState extends State<RunicMainPage> {
                         });
                         try {
                           await _runic.runRune();
+                          setState(() {
+                            loading = false;
+                          });
                         } on Exception catch (e) {}
                       }
                     : null,

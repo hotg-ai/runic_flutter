@@ -1,10 +1,6 @@
 # This is a generated file; do not edit or check into version control.
 camera=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/
-firebase_core=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/firebase_core-0.7.0/
-firebase_core_web=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/firebase_core_web-0.2.1+3/
-firebase_storage=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/firebase_storage-7.0.0/
-firebase_storage_web=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/firebase_storage_web-0.1.1+3/
 mic_stream=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/
 permission_handler=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/
-runevm_fl=/Users/geerttrooskens/.pub-cache/git/runevm_fl-f6e3435fc11bea54b15b95e8b34dfde1db19328e/
+runevm_fl=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/runevm_fl-0.1.4/
 sensors=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/sensors-0.4.2+6/
