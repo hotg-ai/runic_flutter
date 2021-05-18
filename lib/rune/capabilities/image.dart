@@ -1,3 +1,5 @@
+import 'dart:ffi';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:io' show Platform;
 import 'package:camera/camera.dart';
@@ -11,6 +13,7 @@ class ImageCapability {
   final int width;
   final int height;
   final int format;
+  imglib.Image? thumb;
 
   ImageCapability({this.width = 224, this.height = 224, this.format = 0}) {
     print("Created ImageCapability [$width,$height,${ImageFormat[format]}]");
@@ -37,13 +40,21 @@ class ImageCapability {
       }
     }
 
-    return reFormat(img);
+    return reFormat(imglib.copyRotate(img, -90));
+  }
+
+  Uint8List getThumb() {
+    if (thumb != null) {
+      return Uint8List.fromList(imglib.encodePng(thumb));
+    }
+    return Uint8List.fromList([]);
   }
 
   Uint8List reFormat(imglib.Image img) {
     imglib.Image thumbnail = imglib.copyResizeCropSquare(img, width);
     if (format >= 2) {
       thumbnail = imglib.grayscale(thumbnail);
+      thumb = thumbnail;
       final p = thumbnail.getBytes();
       List<int> theBytes = [];
       for (var i = 0; i < p.length; i += 4) {
@@ -58,6 +69,7 @@ class ImageCapability {
     }
     if (format == 1) {
       final p = thumbnail.getBytes();
+      thumb = thumbnail;
       List<int> theBytes = [];
       for (var i = 0; i < p.length; i += 4) {
         int pos = (i / 4).round();
@@ -74,6 +86,8 @@ class ImageCapability {
       return Uint8List.fromList(theBytes);
     }
     final p = thumbnail.getBytes();
+    thumb = thumbnail;
+
     List<int> theBytes = [];
     for (var i = 0; i < p.length; i += 4) {
       int pos = (i / 4).round();
@@ -99,6 +113,6 @@ class ImageCapability {
     ); // Create Image buffer
 
     // rsize/crop/grayscale
-    return reFormat(img);
+    return reFormat(imglib.copyRotate(img, 90));
   }
 }

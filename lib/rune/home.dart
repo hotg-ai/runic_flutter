@@ -27,6 +27,7 @@ class RunicHomePage extends StatefulWidget {
 }
 
 class _RunicHomePageState extends State<RunicHomePage> {
+  Uint8List thumb;
   List<CameraDescription> cameras;
   CameraController controller;
   final Runic _runic = new Runic();
@@ -245,6 +246,18 @@ class _RunicHomePageState extends State<RunicHomePage> {
     // than having to individually change instances of widgets.
     List<Widget> tiles = [];
     List<Widget> runeTiles = [
+      (_runic.capabilities.length > 0)
+          ? ListTile(
+              dense: true,
+              leading: Icon(
+                Icons.run_circle_sharp,
+                color: Color.fromRGBO(59, 188, 235, 1),
+              ),
+              title: Text(
+                "${_runic.rawOutput}",
+                style: TextStyle(color: Colors.white),
+              ))
+          : Container(),
       (_runic.loading)
           ? ListTile(
               dense: true,
@@ -270,7 +283,8 @@ class _RunicHomePageState extends State<RunicHomePage> {
               ))
     ];
     if (_runic.millisecondsPerRun > 0) {
-      runeTiles.add(ListTile(
+      runeTiles.add(
+        ListTile(
           dense: true,
           leading: Icon(
             Icons.speed,
@@ -279,88 +293,16 @@ class _RunicHomePageState extends State<RunicHomePage> {
           title: Text(
             "Runtime: ${_runic.millisecondsPerRun}ms",
             style: TextStyle(color: Colors.white),
-          )));
+          ),
+          subtitle: Container(
+              height: 32,
+              child: LineChart(
+                runTime(_runic.runTimes),
+              )),
+        ),
+      );
     }
 
-    for (String cap in _runic.capabilities.keys) {
-      runeTiles.add(ListTile(
-        dense: true,
-        leading: Icon(
-          Icons.input,
-          color: Color.fromRGBO(59, 188, 235, 1),
-        ),
-        title: Text(
-          "${_runic.capabilities[cap]}",
-          style: TextStyle(color: Colors.white),
-        ),
-        subtitle: Text(
-          "${_runic.parameters[cap]}",
-          style: TextStyle(color: Colors.white, fontSize: 10),
-        ),
-      ));
-      if (cap == "4") {
-        //VIDEO!
-        runeTiles.add(
-          Row(children: [
-            Expanded(
-                child: Center(
-                    child: Container(
-                        height: 280,
-                        width: !(controller.value.isInitialized && mounted)
-                            ? 280
-                            : 1 / controller.value.aspectRatio * 280,
-                        padding: const EdgeInsets.only(
-                            right: 0.0, left: 0.0, top: 0, bottom: 0),
-                        child: (controller.value.isInitialized && mounted)
-                            ? CameraPreview(controller)
-                            : Text("Waiting for Camera")))),
-          ]),
-        );
-        runeTiles.add(Center(
-            child: IconButton(
-                onPressed: () {
-                  initCamera(_currentCamera == 0 ? 1 : 0);
-                },
-                icon: Icon(Icons.camera_front,
-                    color: Color.fromRGBO(59, 188, 235, 1)))));
-      }
-      if (cap == "2") {
-        runeTiles.add(
-          Container(
-            height: 120,
-            padding: const EdgeInsets.only(
-                right: 0.0, left: 0.0, top: 10, bottom: 0),
-            child: LineChart(
-              audioData(_audioRecorder.getBuffer()),
-            ),
-          ),
-        );
-      }
-      if (cap == "3") {
-        runeTiles.add(
-          Container(
-            height: 120,
-            padding: const EdgeInsets.only(
-                right: 0.0, left: 0.0, top: 10, bottom: 0),
-            child: LineChart(
-              accelometerData(_accelerometer),
-            ),
-          ),
-        );
-      }
-    }
-    if (_runic.capabilities.length > 0) {
-      runeTiles.add(ListTile(
-          dense: true,
-          leading: Icon(
-            Icons.run_circle_sharp,
-            color: Color.fromRGBO(59, 188, 235, 1),
-          ),
-          title: Text(
-            "${_runic.rawOutput}",
-            style: TextStyle(color: Colors.white),
-          )));
-    }
     if (_runic.capabilities.containsKey("4")) {
       if (_runic.elements.length > 0) {
       } else if (_runic.capabilities.containsKey("2")) {
@@ -379,9 +321,103 @@ class _RunicHomePageState extends State<RunicHomePage> {
       }
     }
 
+    List<Widget> inputWidgets = [];
+    for (String cap in _runic.capabilities.keys) {
+      runeTiles.add(ListTile(
+        dense: true,
+        leading: Icon(
+          Icons.input,
+          color: Color.fromRGBO(59, 188, 235, 1),
+        ),
+        title: Text(
+          "${_runic.capabilities[cap]}",
+          style: TextStyle(color: Colors.white),
+        ),
+        subtitle: Text(
+          "${_runic.parameters[cap]}",
+          style: TextStyle(color: Colors.white, fontSize: 10),
+        ),
+      ));
+      if (cap == "4") {
+        //VIDEO!
+        inputWidgets.add(
+          Row(children: [
+            Stack(children: [
+              Center(
+                  child: Container(
+                      height: !(controller.value.isInitialized && mounted)
+                          ? MediaQuery.of(context).size.width
+                          : controller.value.aspectRatio *
+                              MediaQuery.of(context).size.width,
+                      width: MediaQuery.of(context).size.width,
+                      padding: const EdgeInsets.only(
+                          right: 0.0, left: 0.0, top: 0, bottom: 0),
+                      child: (controller.value.isInitialized && mounted)
+                          ? CameraPreview(controller)
+                          : Text("Waiting for Camera"))),
+              Positioned(
+                child: Container(
+                    color: lightColor,
+                    width: 120,
+                    height: 120 * _imageCap.height / _imageCap.width,
+                    child: thumb != null ? Image.memory(thumb) : Container()),
+                right: 10,
+                top: 10,
+              ),
+              IconButton(
+                  onPressed: () {
+                    initCamera(_currentCamera == 0 ? 1 : 0);
+                  },
+                  icon: Icon(Icons.camera_front,
+                      color: Color.fromRGBO(59, 188, 235, 1)))
+            ]),
+          ]),
+        );
+      }
+      if (cap == "2") {
+        inputWidgets.add(
+          Container(
+            height: 320,
+            padding: const EdgeInsets.only(
+                right: 21.0, left: 21.0, top: 21, bottom: 21),
+            child: LineChart(
+              audioData(_audioRecorder.getBuffer()),
+            ),
+          ),
+        );
+      }
+      if (cap == "3") {
+        inputWidgets.add(
+          Container(
+            height: 320,
+            padding: const EdgeInsets.only(
+                right: 21.0, left: 21.0, top: 21, bottom: 21),
+            child: LineChart(
+              accelometerData(_accelerometer),
+            ),
+          ),
+        );
+      }
+
+      if (cap == "5") {
+        inputWidgets.add(
+          Container(
+            height: 320,
+            padding: const EdgeInsets.only(
+                right: 21.0, left: 21.0, top: 21, bottom: 21),
+            child: LineChart(
+              mainData(_runic.elements),
+            ),
+          ),
+        );
+      }
+    }
+    runeTiles.add(Container(
+      height: 150,
+    ));
     tiles.addAll([
       Container(
-        height: 15.5,
+        height: 150,
         padding: EdgeInsets.only(top: 5, left: 16),
       ),
       Container(
@@ -391,45 +427,10 @@ class _RunicHomePageState extends State<RunicHomePage> {
                 const Radius.circular(21.0),
               )),
           padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          margin: EdgeInsets.all(8),
+          margin: EdgeInsets.zero,
           child: Column(
             children: runeTiles,
           )),
-
-      /*new TextFormField(
-              decoration:
-                  new InputDecoration(labelText: "Enter Fibonaci Iterations"),
-              initialValue: fibIt.toString(),
-              onChanged: (value) {
-                fibIt = int.parse(value);
-              },
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly
-              ], // Only numbers can be entered
-            ),*/
-
-      /*(answer.length==0)?Container():Container(
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(
-                Radius.circular(40),
-              ),
-              color: Color.fromRGBO(24, 17, 64, 1)),
-          margin: EdgeInsets.only(left: 21,right: 21,bottom: 21),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 18.0, left: 12.0, top: 24, bottom: 12),
-            child: LineChart(
-              mainData(),
-            ),
-          ),),*/
-
-      (_runic.wasmSize == 0)
-          ? Container(height: 0)
-          : Container(
-              width: double.infinity,
-              padding: EdgeInsets.only(left: 21, right: 21),
-              height: 63,
-            )
     ]);
 
     return Scaffold(
@@ -438,6 +439,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
           child: Row(children: [
             Expanded(child: Container()),
             FloatingActionButton(
+                key: Key("button_one"),
                 backgroundColor: Color.fromRGBO(59, 188, 235, 1),
                 splashColor: accentColor,
                 onPressed: (_runic.wasmSize > 0)
@@ -453,6 +455,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               width: 21,
             ),
             FloatingActionButton(
+                key: Key("button_two"),
                 backgroundColor: Color.fromRGBO(59, 188, 235, 1),
                 splashColor: accentColor,
                 onPressed: (_runic.wasmSize > 0)
@@ -462,6 +465,9 @@ class _RunicHomePageState extends State<RunicHomePage> {
                         });
                         try {
                           await _runic.runRune();
+                          if (_runic.capabilities.containsKey("4")) {
+                            thumb = _imageCap.getThumb();
+                          }
                           setState(() {
                             loading = false;
                           });
@@ -475,6 +481,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               width: 21,
             ),
             FloatingActionButton(
+                key: Key("button_three"),
                 backgroundColor: runningContinious
                     ? accentColor
                     : Color.fromRGBO(59, 188, 235, 1),
@@ -484,6 +491,10 @@ class _RunicHomePageState extends State<RunicHomePage> {
                         while (runningContinious) {
                           try {
                             await _runic.runRune();
+                            if (_runic.capabilities.containsKey("4") &&
+                                Random().nextDouble() < 0.01) {
+                              thumb = _imageCap.getThumb();
+                            }
                             setState(() {
                               loading = false;
                             });
@@ -503,26 +514,20 @@ class _RunicHomePageState extends State<RunicHomePage> {
       ),
       body: Stack(children: [
         Container(
+            width: double.infinity,
+            height: double.infinity,
+            child: Column(
+              children: inputWidgets,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+            )),
+        Positioned(
+            height: 480,
+            left: 0,
+            right: 0,
+            bottom: 0,
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
             child: ListView(children: tiles)),
-        _train
-            ? Container(
-                color: Color.fromRGBO(59, 188, 235, 1).withAlpha(200),
-                child: Center(
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(
-                    "Train $_trainGesture Gesture\n\n$_trainDescription",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white),
-                  ),
-                ])))
-            : Container(
-                height: 0,
-              )
       ]),
 
       // This trailing comma makes auto-formatting nicer for build methods.

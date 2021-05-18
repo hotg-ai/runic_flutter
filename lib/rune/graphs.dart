@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:runic_mobile/rune/capabilities/accelerometer.dart';
+import 'package:runic_mobile/rune/registry.dart';
 
 List<Color?> gradientColorsX = [
   Colors.red[200],
@@ -90,6 +91,98 @@ LineChartData audioData(List<int> x) {
     maxX: x.length * 1.0,
     minY: minMax[0],
     maxY: minMax[1],
+    lineBarsData: [
+      LineChartBarData(
+        spots: spotsX,
+        isCurved: false,
+        colors: gradientColorsX,
+        barWidth: 2,
+        isStrokeCapRound: true,
+        dotData: FlDotData(
+          show: false,
+        ),
+        belowBarData: BarAreaData(
+          show: true,
+          colors:
+              gradientColors.map((color) => color?.withOpacity(0.1)).toList(),
+        ),
+      ),
+    ],
+  );
+}
+
+LineChartData runTime(List<int> input) {
+  List<int> x =
+      (input.length > 200) ? input.sublist(input.length - 200) : input;
+  final List<double> minMax = [0, 10000];
+  List<FlSpot> spotsX = [];
+  double max = 0;
+  for (int i = 0; i < x.length; i++) {
+    double value = x[i] > minMax[1]
+        ? minMax[1]
+        : (x[i] * 1.0 < minMax[0] ? minMax[0] : x[i] * 1.0);
+    max = (max > value) ? max : value;
+    spotsX.add(FlSpot(i * 1.0, value * 1.0));
+  }
+  if (spotsX.length == 0) {
+    spotsX.add(FlSpot(0, 0));
+  }
+  return LineChartData(
+    gridData: FlGridData(
+      show: true,
+      drawVerticalLine: true,
+      getDrawingHorizontalLine: (value) {
+        return FlLine(
+          color: const Color(0xff37434d),
+          strokeWidth: 1,
+        );
+      },
+      getDrawingVerticalLine: (value) {
+        return FlLine(
+          color: const Color(0xff37434d),
+          strokeWidth: 1,
+        );
+      },
+    ),
+    titlesData: FlTitlesData(
+      show: false,
+      bottomTitles: SideTitles(
+        showTitles: false,
+        reservedSize: 10,
+        getTextStyles: (value) => const TextStyle(
+            color: Color(0xff68737d),
+            fontWeight: FontWeight.bold,
+            fontSize: 12),
+        getTitles: (value) {
+          switch (value) {
+          }
+          return (value.round() % 12 == 0) ? value.toString() : "";
+        },
+        margin: 2,
+      ),
+      leftTitles: SideTitles(
+        showTitles: false,
+        getTextStyles: (value) => const TextStyle(
+          color: Color(0xff67727d),
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+        getTitles: (value) {
+          switch (value) {
+          }
+          return value.round().toString();
+        },
+        reservedSize: 21,
+        margin: 12,
+      ),
+    ),
+    borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: const Color(0xff37434d), width: 1)),
+    minX: 0,
+    maxX: x.length * 1.0,
+    minY: 0,
+    maxY: max,
     lineBarsData: [
       LineChartBarData(
         spots: spotsX,

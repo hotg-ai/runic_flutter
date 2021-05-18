@@ -65,6 +65,7 @@ class Runic {
   }
 
   Future<Uint8List> downloadWASM(String urlString) async {
+    runTimes = [];
     final url = Uri.parse(urlString);
     final client = http.Client();
     final request = http.Request('GET', url);
@@ -81,6 +82,7 @@ class Runic {
   }
 
   int millisecondsPerRun = 0;
+  List<int> runTimes = [];
   Future<void> runRune({dynamic inputBytes}) async {
     if (inputBytes == null) {
       inputBytes = Runic.inputData;
@@ -126,6 +128,7 @@ class Runic {
     int millisecs =
         new DateTime.now().millisecondsSinceEpoch - startMillisecond;
     millisecondsPerRun = max(millisecs, 1);
+    runTimes.add(millisecondsPerRun);
     if (capabilities.containsKey("5")) {
       var out = jsonDecode(result);
       elements.add({"in": input, "out": out[0]});
