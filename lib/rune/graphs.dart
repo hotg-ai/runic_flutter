@@ -27,7 +27,7 @@ LineChartData audioData(List<int> x) {
   List<FlSpot> spotsX = [];
 
   for (int i = 0; i < x.length; i++) {
-    double value = x[i] > minMax[1]
+    double value = x[i] * 1.0 > minMax[1]
         ? minMax[1]
         : (x[i] * 1.0 < minMax[0] ? minMax[0] : x[i] * 1.0);
     spotsX.add(FlSpot(i * 1.0, value * 1.0));
@@ -118,7 +118,7 @@ LineChartData runTime(List<int> input) {
   List<FlSpot> spotsX = [];
   double max = 0;
   for (int i = 0; i < x.length; i++) {
-    double value = x[i] > minMax[1]
+    double value = x[i] * 1.0 > minMax[1]
         ? minMax[1]
         : (x[i] * 1.0 < minMax[0] ? minMax[0] : x[i] * 1.0);
     max = (max > value) ? max : value;

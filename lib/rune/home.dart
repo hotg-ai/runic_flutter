@@ -1,6 +1,6 @@
 // @dart=2.9
 import 'dart:convert';
-
+import 'package:flutter/src/services/system_chrome.dart';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -20,7 +20,9 @@ const speech = ["Silence", "Yes", "No"];
 
 class RunicHomePage extends StatefulWidget {
   final Map<String, dynamic> currentRune;
-  RunicHomePage({Key key, this.currentRune}) : super(key: key);
+  final bool url;
+  RunicHomePage({Key key, this.currentRune, this.url = false})
+      : super(key: key);
 
   @override
   _RunicHomePageState createState() => _RunicHomePageState();
@@ -47,7 +49,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
     deploy();
   }
 
-  int _currentCamera = 0;
+  int _currentCamera = 1;
   bool _cameraInitialized;
   initCamera(int cameraID) async {
     cameras = await availableCameras();
@@ -63,6 +65,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
     controller = CameraController(
         cameras.length > cameraID ? cameras[cameraID] : cameras[0],
         ResolutionPreset.low);
+    //controller.lockCaptureOrientation(DeviceOrientation.portraitUp);
     print("Init Camera");
 
     controller?.addListener(() {
@@ -77,7 +80,8 @@ class _RunicHomePageState extends State<RunicHomePage> {
       await controller?.startImageStream((CameraImage image) async {
         if (_running == false) {
           _running = true;
-          Runic.inputData = _imageCap.processCameraImage(image);
+          Runic.inputData = _imageCap.processCameraImage(
+              image, (Platform.isIOS) ? 90 : 90 + _currentCamera * 180);
           _running = false;
           //setState(() {});
         }
@@ -128,6 +132,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
   String _trainGesture = "";
   String _trainDescription = "";
   bool runningContinious = false;
+  bool error = false;
   String getRandString(int len) {
     var random = Random.secure();
     var values = List<int>.generate(len, (i) => random.nextInt(255));
@@ -187,12 +192,24 @@ class _RunicHomePageState extends State<RunicHomePage> {
       loading = true;
     });
     try {
-      await _runic.deployWASM(widget.currentRune["name"], () {
-        setState(() {});
-      });
+      if (widget.url) {
+        await _runic.deployWASMFromURL(widget.currentRune["name"], () {
+          setState(() {});
+        });
+      } else {
+        await _runic.deployWASM(widget.currentRune["name"], () {
+          setState(() {});
+        });
+      }
+
       try {
         print("_runic.getManifest: ");
-        await _runic.getManifest("manifest");
+        dynamic man = await _runic.getManifest("manifest");
+        if (man == -1) {
+          setState(() {
+            error = true;
+          });
+        }
         print("_runic.getManifest: ${_runic.parameters}");
         if (_runic.capabilities.containsKey("4")) {
           if (_runic.parameters["4"].containsKey("width") &&
@@ -439,7 +456,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
           child: Row(children: [
             Expanded(child: Container()),
             FloatingActionButton(
-                key: Key("button_one"),
+                key: Key("button_one_${Random().nextInt(10000000)}"),
                 backgroundColor: Color.fromRGBO(59, 188, 235, 1),
                 splashColor: accentColor,
                 onPressed: (_runic.wasmSize > 0)
@@ -455,7 +472,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               width: 21,
             ),
             FloatingActionButton(
-                key: Key("button_two"),
+                key: Key("button_two_${Random().nextInt(10000000)}"),
                 backgroundColor: Color.fromRGBO(59, 188, 235, 1),
                 splashColor: accentColor,
                 onPressed: (_runic.wasmSize > 0)
@@ -481,7 +498,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               width: 21,
             ),
             FloatingActionButton(
-                key: Key("button_three"),
+                key: Key("button_three_${Random().nextInt(10000000)}"),
                 backgroundColor: runningContinious
                     ? accentColor
                     : Color.fromRGBO(59, 188, 235, 1),
@@ -512,23 +529,39 @@ class _RunicHomePageState extends State<RunicHomePage> {
         title: Text(widget.currentRune["name"],
             style: TextStyle(color: Colors.white)),
       ),
-      body: Stack(children: [
-        Container(
-            width: double.infinity,
-            height: double.infinity,
-            child: Column(
-              children: inputWidgets,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-            )),
-        Positioned(
-            height: 480,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            // Center is a layout widget. It takes a single child and positions it
-            // in the middle of the parent.
-            child: ListView(children: tiles)),
-      ]),
+      body: error
+          ? Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: Center(
+                  child: Column(children: [
+                Icon(
+                  Icons.error_rounded,
+                  color: accentColor,
+                ),
+                Text(
+                  "Error deploying Rune",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800, color: accentColor),
+                )
+              ])))
+          : Stack(children: [
+              Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Column(
+                    children: inputWidgets,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  )),
+              Positioned(
+                  height: 480,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  // Center is a layout widget. It takes a single child and positions it
+                  // in the middle of the parent.
+                  child: ListView(children: tiles)),
+            ]),
 
       // This trailing comma makes auto-formatting nicer for build methods.
     );

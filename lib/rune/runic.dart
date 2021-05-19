@@ -64,6 +64,17 @@ class Runic {
     setState();
   }
 
+  Future<void> deployWASMFromURL(String urlString, Function setState) async {
+    //download
+    loading = true;
+    setState();
+    Uint8List wasmBytes = await downloadWASM('$urlString');
+    await RunevmFl.load(wasmBytes);
+    wasmSize = wasmBytes.length;
+    loading = false;
+    setState();
+  }
+
   Future<Uint8List> downloadWASM(String urlString) async {
     runTimes = [];
     final url = Uri.parse(urlString);
@@ -165,6 +176,7 @@ class Runic {
       }
     } catch (e) {
       print("Error reading manifest: $e");
+      return -1;
     }
 
     return 0;
