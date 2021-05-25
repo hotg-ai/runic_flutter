@@ -196,8 +196,8 @@ class _RunicHomePageState extends State<RunicHomePage> {
           setState(() {});
         });
       } else {
-        await _runic.deployWASM(
-            widget.currentRune["name"], widget.currentRune["version"].toString(), () {
+        await _runic.deployWASM(widget.currentRune["name"],
+            widget.currentRune["version"].toString(), () {
           setState(() {});
         });
       }
@@ -307,7 +307,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               ),
               title: Text(
                 "${_runic.rawOutput}",
-                style: TextStyle(color: Colors.white, fontSize: 9),
+                style: TextStyle(color: Colors.white, fontSize: 10),
               ))
           : Container(),
       (_runic.loading)
