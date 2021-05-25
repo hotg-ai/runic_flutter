@@ -134,10 +134,11 @@ class Runic {
           if (outJson.length == 2) {
             elements = [];
             List<dynamic> labels = outJson[0]["elements"];
-            List<dynamic> scores = outJson[1]["elements"];
+            List<dynamic> scores = outJson[1]["elements"]; 
             for (int i = 0; i < labels.length; i++) {
               elements.add({"label": labels[i], "score": scores[i] / 1000});
             }
+            
             elements.sort((b, a) => a["score"].compareTo(b["score"]));
             rawOutput = elements.toString();
           } else {
