@@ -63,11 +63,23 @@ class Runic {
     final directory = await getTemporaryDirectory();
     String fileURL = "${directory.path}/$fileName";
     print(">>>>$fileURL");
-    Uint8List wasmBytes = await downloadWASM(
-        'https://rune-registry.web.app/registry/' + name + '/app.rune');
-    await RunevmFl.load(wasmBytes);
-    wasmSize = wasmBytes.length;
-    loading = false;
+
+    if (await File(fileURL).exists()) {
+      print("file in cache!");
+      Uint8List wasmBytes = await File(fileURL).readAsBytes();
+      await RunevmFl.load(wasmBytes);
+      wasmSize = wasmBytes.length;
+      loading = false;
+    } else {
+      Uint8List wasmBytes = await downloadWASM(
+          'https://rune-registry.web.app/registry/' + name + '/app.rune');
+      //write to cache dir
+      await File(fileURL).writeAsBytes(wasmBytes);
+      await RunevmFl.load(wasmBytes);
+      wasmSize = wasmBytes.length;
+      loading = false;
+    }
+
     setState();
   }
 
@@ -134,11 +146,11 @@ class Runic {
           if (outJson.length == 2) {
             elements = [];
             List<dynamic> labels = outJson[0]["elements"];
-            List<dynamic> scores = outJson[1]["elements"]; 
+            List<dynamic> scores = outJson[1]["elements"];
             for (int i = 0; i < labels.length; i++) {
               elements.add({"label": labels[i], "score": scores[i] / 1000});
             }
-            
+
             elements.sort((b, a) => a["score"].compareTo(b["score"]));
             rawOutput = elements.toString();
           } else {

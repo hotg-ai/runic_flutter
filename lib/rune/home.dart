@@ -197,7 +197,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
         });
       } else {
         await _runic.deployWASM(
-            widget.currentRune["name"], widget.currentRune["version"], () {
+            widget.currentRune["name"], widget.currentRune["version"].toString(), () {
           setState(() {});
         });
       }
