@@ -14,7 +14,7 @@ class ImageCapability {
   final int height;
   final int format;
   imglib.Image? thumb;
-
+  CameraImage? image;
   ImageCapability({this.width = 224, this.height = 224, this.format = 0}) {
     print("Created ImageCapability [$width,$height,${ImageFormat[format]}]");
   }

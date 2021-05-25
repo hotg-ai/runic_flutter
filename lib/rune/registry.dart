@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:runic_mobile/rune/home.dart';
@@ -20,6 +21,19 @@ class Registry extends StatefulWidget {
 
 class _RegistryState extends State<Registry> {
   final _searchController = TextEditingController();
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  Barcode? result;
+  QRViewController? controller;
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      controller!.pauseCamera();
+    } else if (Platform.isIOS) {
+      controller!.resumeCamera();
+    }
+  }
 
   @override
   void initState() {
@@ -27,7 +41,25 @@ class _RegistryState extends State<Registry> {
     super.initState();
   }
 
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        result = scanData;
+        _url = result!.code;
+        _textController.text = _url;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
   List<dynamic> searchList = [];
+  TextEditingController _textController = new TextEditingController(text: _url);
   void loadRegistry() async {
     _searchController.addListener(() {
       search(_searchController.text);
@@ -55,7 +87,12 @@ class _RegistryState extends State<Registry> {
   }
 
   void open(Map<String, dynamic> rune, bool isURL) async {
-    Navigator.push(
+    if (controller != null) {
+      controller!.stopCamera();
+    }
+    _link = false;
+    setState(() {});
+    await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => RunicHomePage(
@@ -63,6 +100,7 @@ class _RegistryState extends State<Registry> {
                 url: isURL,
               )),
     );
+    setState(() {});
   }
 
   bool _link = false;
@@ -95,14 +133,23 @@ class _RegistryState extends State<Registry> {
                 child: ListView(
                   children: [
                     TextFormField(
+                      controller: _textController,
                       style: TextStyle(color: accentColor),
-                      initialValue: _url,
                       onChanged: (value) {
                         _url = value;
                       },
                       decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           labelText: 'Rune url'),
+                    ),
+                    Container(
+                      height: 300,
+                      width: double.infinity,
+                      padding: EdgeInsets.all(21),
+                      child: QRView(
+                        key: qrKey,
+                        onQRViewCreated: _onQRViewCreated,
+                      ),
                     ),
                     FlatButton(
                       height: 42,
@@ -164,44 +211,64 @@ class _RegistryState extends State<Registry> {
                                     color: darkColor,
                                     margin: EdgeInsets.all(6),
                                     child: Container(
-                                      padding: EdgeInsets.all(21),
+                                      padding: EdgeInsets.all(0),
                                       child: new GridTile(
                                           child: Container(
                                               child: Opacity(
-                                            opacity: 0.2,
-                                            child: Image.asset(
-                                              "assets/rune.png",
-                                              height: double.infinity,
-                                              width: double.infinity,
-                                            ),
-                                          )),
-                                          header: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                new Text(
-                                                  searchList[index]['name'],
-                                                  style: TextStyle(
-                                                      color: accentColor,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                ),
-                                                Container(
-                                                  alignment:
-                                                      Alignment.centerLeft,
-                                                  child: new Text(
-                                                    searchList[index]
-                                                        ['description'],
-                                                    textAlign: TextAlign.left,
-                                                    style: TextStyle(
-                                                        color: whiteColor,
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                                  ), //just for testing, will fill with image later
-                                                )
-                                              ])),
+                                                  opacity: 0.5,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                    child: (searchList[index]
+                                                            .containsKey("img"))
+                                                        ? Image.network(
+                                                            searchList[index]
+                                                                ["img"]["src"],
+                                                            height:
+                                                                double.infinity,
+                                                            width:
+                                                                double.infinity,
+                                                          )
+                                                        : Image.asset(
+                                                            "assets/rune.png",
+                                                            height:
+                                                                double.infinity,
+                                                            width:
+                                                                double.infinity,
+                                                          ),
+                                                  ))),
+                                          header: Container(
+                                              padding: EdgeInsets.all(21.0),
+                                              child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    new Text(
+                                                      searchList[index]['name'],
+                                                      style: TextStyle(
+                                                          color: accentColor,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                    ),
+                                                    Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      child: new Text(
+                                                        searchList[index]
+                                                            ['description'],
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                        style: TextStyle(
+                                                            color: whiteColor,
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                      ), //just for testing, will fill with image later
+                                                    )
+                                                  ]))),
                                     )));
                           },
                         ))),

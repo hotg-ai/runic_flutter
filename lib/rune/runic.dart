@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'dart:convert' show utf8;
 
@@ -29,13 +30,14 @@ class Runic {
   ];
 
   static Future<void> fetchRegistry() async {
-    final url =
-        Uri.parse("https://rune-registry.web.app/registry/registry.json");
+    final url = Uri.parse("https://rune-registry.web.app/registry/runes.json");
     final response = await http.get(url);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
       runes = List<dynamic>.from(jsonDecode(response.body));
+      //only show the ones with display == true;
+      runes = runes.where((element) => element["display"] == true).toList();
       print("Rune registry loaded:\n$runes");
     } else {
       // If the server did not return a 200 OK response,
@@ -52,12 +54,17 @@ class Runic {
   int wasmSize = 0;
   bool loading = false;
 
-  Future<void> deployWASM(String urlString, Function setState) async {
+  Future<void> deployWASM(
+      String name, String version, Function setState) async {
     //download
     loading = true;
     setState();
+    String fileName = "${name.replaceAll("/", "-")}-$version.rune";
+    final directory = await getTemporaryDirectory();
+    String fileURL = "${directory.path}/$fileName";
+    print(">>>>$fileURL");
     Uint8List wasmBytes = await downloadWASM(
-        'https://rune-registry.web.app/registry/' + urlString + '/app.rune');
+        'https://rune-registry.web.app/registry/' + name + '/app.rune');
     await RunevmFl.load(wasmBytes);
     wasmSize = wasmBytes.length;
     loading = false;
@@ -122,7 +129,21 @@ class Runic {
 
       try {
         final outJson = json.decode(result);
-        if (outJson.containsKey("string")) {
+        if (outJson.runtimeType.toString() == "List<dynamic>") {
+          //need to add more type checks
+          if (outJson.length == 2) {
+            elements = [];
+            List<dynamic> labels = outJson[0]["elements"];
+            List<dynamic> scores = outJson[1]["elements"];
+            for (int i = 0; i < labels.length; i++) {
+              elements.add({"label": labels[i], "score": scores[i] / 1000});
+            }
+            elements.sort((b, a) => a["score"].compareTo(b["score"]));
+            rawOutput = elements.toString();
+          } else {
+            rawOutput = "Raw output: $result";
+          }
+        } else if (outJson.containsKey("string")) {
           rawOutput = "Result: ${outJson["string"]}";
         } else if (outJson.containsKey("elements")) {
           rawOutput = "Result: ${outJson["elements"]}";

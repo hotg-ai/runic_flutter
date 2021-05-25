@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="PLATFORM" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/qr_code_scanner-0.4.0/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/runevm_fl-0.1.4/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/sensors-0.4.2+6/android" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

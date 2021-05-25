@@ -37,7 +37,7 @@ android {
         applicationId "ai.hotg.runicapp"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode flutterVersionCode.toInteger()
+        versionCode 3
         versionName flutterVersionName
     }
 

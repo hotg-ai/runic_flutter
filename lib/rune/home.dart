@@ -80,8 +80,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
       await controller?.startImageStream((CameraImage image) async {
         if (_running == false) {
           _running = true;
-          Runic.inputData = _imageCap.processCameraImage(
-              image, (Platform.isIOS) ? 90 : 90 + _currentCamera * 180);
+          _imageCap.image = image;
           _running = false;
           //setState(() {});
         }
@@ -197,7 +196,8 @@ class _RunicHomePageState extends State<RunicHomePage> {
           setState(() {});
         });
       } else {
-        await _runic.deployWASM(widget.currentRune["name"], () {
+        await _runic.deployWASM(
+            widget.currentRune["name"], widget.currentRune["version"], () {
           setState(() {});
         });
       }
@@ -220,7 +220,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
                 height: int.parse(_runic.parameters["4"]["height"]),
                 format: int.parse(_runic.parameters["4"]["pixel_format"]));
           }
-          initCamera(1);
+          initCamera(0);
         }
 
         if (_runic.capabilities.containsKey("2")) {
@@ -262,17 +262,52 @@ class _RunicHomePageState extends State<RunicHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     List<Widget> tiles = [];
+    List<Widget> props = [];
+    if (!_runic.capabilities.containsKey("5") && _runic.elements.length > 0) {
+      for (Map element in _runic.elements) {
+        props.add(Container(
+            height: 28,
+            child: Row(
+              children: [
+                Expanded(
+                    child: Text(element["label"],
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: LinearProgressIndicator(
+                  backgroundColor: lightColor,
+                  color: Color.fromRGBO(59, 188, 235, 1),
+                  value: element["score"],
+                ))
+              ],
+            )));
+      }
+    }
     List<Widget> runeTiles = [
+      (!_runic.capabilities.containsKey("5") && _runic.elements.length > 0)
+          ? ListTile(
+              dense: false,
+              leading: Icon(
+                Icons.insights,
+                color: Color.fromRGBO(59, 188, 235, 1),
+              ),
+              title: Column(
+                children: props,
+              ),
+            )
+          : Container(),
       (_runic.capabilities.length > 0)
           ? ListTile(
               dense: true,
               leading: Icon(
-                Icons.run_circle_sharp,
+                Icons.raw_on,
                 color: Color.fromRGBO(59, 188, 235, 1),
               ),
               title: Text(
                 "${_runic.rawOutput}",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 9),
               ))
           : Container(),
       (_runic.loading)
@@ -318,24 +353,6 @@ class _RunicHomePageState extends State<RunicHomePage> {
               )),
         ),
       );
-    }
-
-    if (_runic.capabilities.containsKey("4")) {
-      if (_runic.elements.length > 0) {
-      } else if (_runic.capabilities.containsKey("2")) {
-      } else if (_runic.capabilities.containsKey("3")) {
-      } else if (_runic.capabilities.containsKey("5")) {
-        runeTiles.add(
-          Container(
-            height: 120,
-            padding: const EdgeInsets.only(
-                right: 0.0, left: 0.0, top: 10, bottom: 0),
-            child: LineChart(
-              mainData(_runic.elements),
-            ),
-          ),
-        );
-      }
     }
 
     List<Widget> inputWidgets = [];
@@ -456,7 +473,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
           child: Row(children: [
             Expanded(child: Container()),
             FloatingActionButton(
-                key: Key("button_one_${Random().nextInt(10000000)}"),
+                key: Key("button_one"),
                 backgroundColor: Color.fromRGBO(59, 188, 235, 1),
                 splashColor: accentColor,
                 onPressed: (_runic.wasmSize > 0)
@@ -472,7 +489,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               width: 21,
             ),
             FloatingActionButton(
-                key: Key("button_two_${Random().nextInt(10000000)}"),
+                key: Key("button_two"),
                 backgroundColor: Color.fromRGBO(59, 188, 235, 1),
                 splashColor: accentColor,
                 onPressed: (_runic.wasmSize > 0)
@@ -481,6 +498,13 @@ class _RunicHomePageState extends State<RunicHomePage> {
                           loading = true;
                         });
                         try {
+                          if (_runic.capabilities.containsKey("4")) {
+                            Runic.inputData = _imageCap.processCameraImage(
+                                _imageCap.image,
+                                (Platform.isIOS)
+                                    ? 90
+                                    : 90 + _currentCamera * 180);
+                          }
                           await _runic.runRune();
                           if (_runic.capabilities.containsKey("4")) {
                             thumb = _imageCap.getThumb();
@@ -498,7 +522,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
               width: 21,
             ),
             FloatingActionButton(
-                key: Key("button_three_${Random().nextInt(10000000)}"),
+                key: Key("button_three"),
                 backgroundColor: runningContinious
                     ? accentColor
                     : Color.fromRGBO(59, 188, 235, 1),
@@ -507,6 +531,13 @@ class _RunicHomePageState extends State<RunicHomePage> {
                         runningContinious = true;
                         while (runningContinious) {
                           try {
+                            if (_runic.capabilities.containsKey("4")) {
+                              Runic.inputData = _imageCap.processCameraImage(
+                                  _imageCap.image,
+                                  (Platform.isIOS)
+                                      ? 90
+                                      : 90 + _currentCamera * 180);
+                            }
                             await _runic.runRune();
                             if (_runic.capabilities.containsKey("4") &&
                                 Random().nextDouble() < 0.01) {
