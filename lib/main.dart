@@ -1,17 +1,6 @@
 // @dart=2.9
-import 'dart:convert';
-
-import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:runic_mobile/rune/capabilities/accelerometer.dart';
-import 'package:runic_mobile/rune/capabilities/audio.dart';
-import 'package:runic_mobile/rune/capabilities/image.dart';
 import 'package:runic_mobile/rune/runic.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:camera/camera.dart';
 import 'rune/registry.dart';
 
 void main() async {

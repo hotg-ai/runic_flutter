@@ -40,7 +40,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
 
   ImageCapability _imageCap = new ImageCapability();
   AcceleroMeter _accelerometer =
-      new AcceleroMeter(stepSize: 16, bufferLength: 128);
+      new AcceleroMeter(stepSize: 16, bufferLength: 64);
   Audio _audioRecorder = new Audio();
 
   @override
@@ -230,6 +230,13 @@ class _RunicHomePageState extends State<RunicHomePage> {
         }
 
         if (_runic.capabilities.containsKey("3")) {
+          print("_runic.capabilities");
+          int bufferLength = _runic.parameters["3"].containsKey("n")
+              ? int.parse(_runic.parameters["3"]["n"])
+              : 128;
+
+          _accelerometer =
+              new AcceleroMeter(stepSize: 16, bufferLength: bufferLength);
           _accelerometer.startRecording();
           _running = true;
           _accelerometer.onStep = (List<dynamic> buffer) async {

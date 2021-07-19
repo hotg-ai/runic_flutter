@@ -32,7 +32,13 @@
     <exclude-output />
     <content url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2">
       <sourceFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/android/src/main/java" isTestSource="false" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/.dart_tool" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/.pub" />
       <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/android/.gradle" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/build" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/example/.dart_tool" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/example/.pub" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/example/build" />
     </content>
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/aidl_source_output_dir/debug/out" />
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/aidl_source_output_dir/debugAndroidTest/out" />

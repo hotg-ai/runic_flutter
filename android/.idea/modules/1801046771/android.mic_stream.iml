@@ -32,7 +32,13 @@
     <exclude-output />
     <content url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0">
       <sourceFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/android/src/main/java" isTestSource="false" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/.dart_tool" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/.pub" />
       <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/android/.gradle" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/build" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/example/.dart_tool" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/example/.pub" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/example/build" />
     </content>
     <content url="file://$MODULE_DIR$/../../../../build/mic_stream/generated/aidl_source_output_dir/debug/out" />
     <content url="file://$MODULE_DIR$/../../../../build/mic_stream/generated/aidl_source_output_dir/debugAndroidTest/out" />

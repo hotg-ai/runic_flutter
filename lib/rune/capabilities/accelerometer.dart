@@ -11,7 +11,7 @@ class AcceleroMeter {
   final int stepSize;
   int stepCounter = 0;
   List _streamSubscriptions = [];
-  AcceleroMeter({this.bufferLength = 128, this.stepSize = 8});
+  AcceleroMeter({this.bufferLength = 64, this.stepSize = 8});
 
   Function onStep = (List buffer) {};
 

@@ -33,7 +33,13 @@
     <content url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4">
       <sourceFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/android/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/android/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/.dart_tool" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/.pub" />
       <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/android/.gradle" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/build" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/example/.dart_tool" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/example/.pub" />
+      <excludeFolder url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/example/build" />
     </content>
     <content url="file://$MODULE_DIR$/../../../../build/camera/generated/aidl_source_output_dir/debug/out" />
     <content url="file://$MODULE_DIR$/../../../../build/camera/generated/aidl_source_output_dir/debugAndroidTest/out" />

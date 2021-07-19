@@ -1,5 +1,6 @@
 # This is a generated file; do not edit or check into version control.
 camera=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/
+import_js_library=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/import_js_library-1.0.2/
 mic_stream=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/
 path_provider=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/path_provider-2.0.1/
 path_provider_linux=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.0.0/
@@ -7,5 +8,5 @@ path_provider_macos=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/pat
 path_provider_windows=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.0.1/
 permission_handler=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/
 qr_code_scanner=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/qr_code_scanner-0.4.0/
-runevm_fl=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/runevm_fl-0.1.4/
+runevm_fl=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/runevm_fl-0.2.0/
 sensors=/Users/geerttrooskens/.pub-cache/hosted/pub.dartlang.org/sensors-0.4.2+6/

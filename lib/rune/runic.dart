@@ -32,17 +32,23 @@ class Runic {
   static Future<void> fetchRegistry() async {
     final url = Uri.parse("https://rune-registry.web.app/registry/runes.json");
     final response = await http.get(url);
+    final directory = await getTemporaryDirectory();
+    String fileURL = "${directory.path}/runes.json";
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
       runes = List<dynamic>.from(jsonDecode(response.body));
+      //save list
+      await File(fileURL).writeAsString(response.body);
       //only show the ones with display == true;
       runes = runes.where((element) => element["display"] == true).toList();
-      print("Rune registry loaded:\n$runes");
     } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load registry');
+      if (await File(fileURL).exists()) {
+        runes =
+            List<dynamic>.from(jsonDecode(await File(fileURL).readAsString()));
+        //only show the ones with display == true;
+        runes = runes.where((element) => element["display"] == true).toList();
+      }
     }
   }
 
@@ -141,7 +147,7 @@ class Runic {
 
       try {
         final outJson = json.decode(result);
-        if (outJson.runtimeType.toString() == "List<dynamic>") {
+        if (outJson.runtimeType.toString().contains("List")) {
           //need to add more type checks
           if (outJson.length == 2) {
             elements = [];
