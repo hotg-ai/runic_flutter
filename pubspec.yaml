@@ -23,7 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  runevm_fl: ^0.1.4
+  runevm_fl: 
+    path: ../runevm_fl
   http: ^0.12.2
   protoc_plugin: ^19.2.0+1
   fl_chart: ^0.12.2

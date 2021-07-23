@@ -278,7 +278,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
                 Expanded(
                     child: LinearProgressIndicator(
                   backgroundColor: lightColor,
-                  color: Color.fromRGBO(59, 188, 235, 1),
+                  // color: Color.fromRGBO(59, 188, 235, 1),
                   value: element["score"],
                 ))
               ],
@@ -302,7 +302,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
           ? ListTile(
               dense: true,
               leading: Icon(
-                Icons.raw_on,
+                Icons.play_arrow,
                 color: Color.fromRGBO(59, 188, 235, 1),
               ),
               title: Text(
@@ -313,7 +313,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
       (_runic.loading)
           ? ListTile(
               dense: true,
-              leading: CircularProgressIndicator(color: accentColor),
+              leading: CircularProgressIndicator(),
               title: Text(
                 " Loading ",
                 style: TextStyle(color: Colors.white),
