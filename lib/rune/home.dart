@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:runic_mobile/rune/graphs.dart';
 import 'package:runic_mobile/rune/capabilities/accelerometer.dart';
 import 'package:runic_mobile/rune/capabilities/audio.dart';
@@ -37,6 +38,8 @@ class _RunicHomePageState extends State<RunicHomePage> {
 
   bool model = false;
   bool loading = false;
+
+  Uint8List imageTwo;
 
   ImageCapability _imageCap = new ImageCapability();
   AcceleroMeter _accelerometer =
@@ -119,7 +122,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
         while (audio.length < 32000) {
           audio.add(0);
         }
-        Runic.inputData = Uint8List.fromList(audio);
+        Runic.inputData[0] = Uint8List.fromList(audio);
         _running = false;
       }
       setState(() {});
@@ -204,13 +207,19 @@ class _RunicHomePageState extends State<RunicHomePage> {
 
       try {
         print("_runic.getManifest: ");
-        dynamic man = await _runic.getManifest("manifest");
-        if (man == -1) {
+        List man = await _runic.getManifest("manifest");
+        if (man.length == 0) {
           setState(() {
             error = true;
           });
         }
         print("_runic.getManifest: ${_runic.parameters}");
+
+        if (_runic.capabilitiesList.length > 1) {
+          print(
+              "_imageCap = new ImageCapability(width: 384, height: 384, format: 0);");
+          _imageCap = new ImageCapability(width: 384, height: 384, format: 0);
+        }
         if (_runic.capabilities.containsKey("4")) {
           if (_runic.parameters["4"].containsKey("width") &&
               _runic.parameters["4"].containsKey("height") &&
@@ -219,7 +228,10 @@ class _RunicHomePageState extends State<RunicHomePage> {
                 width: int.parse(_runic.parameters["4"]["width"]),
                 height: int.parse(_runic.parameters["4"]["height"]),
                 format: int.parse(_runic.parameters["4"]["pixel_format"]));
+            //hard coded fix for style transfer
+
           }
+
           initCamera(0);
         }
 
@@ -241,7 +253,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
           _running = true;
           _accelerometer.onStep = (List<dynamic> buffer) async {
             //print("ok");
-            Runic.inputData = _accelerometer.getByteList();
+            Runic.inputData[0] = _accelerometer.getByteList();
             //List<Map<String, Object>> result =
             //    await _runic.runRune(_accelerometer.getByteList());
 
@@ -306,16 +318,20 @@ class _RunicHomePageState extends State<RunicHomePage> {
             )
           : Container(),
       (_runic.capabilities.length > 0)
-          ? ListTile(
-              dense: true,
-              leading: Icon(
-                Icons.raw_on,
-                color: Color.fromRGBO(59, 188, 235, 1),
-              ),
-              title: Text(
-                "${_runic.rawOutput}",
-                style: TextStyle(color: Colors.white, fontSize: 10),
-              ))
+          ? (_runic.capabilitiesList.length > 1 && _runic.outputData.length > 0)
+              ? ListTile(
+                  title: Image.memory(_runic.getImageOut()),
+                )
+              : ListTile(
+                  dense: true,
+                  leading: Icon(
+                    Icons.raw_on,
+                    color: Color.fromRGBO(59, 188, 235, 1),
+                  ),
+                  title: Text(
+                    "${_runic.rawOutput}",
+                    style: TextStyle(color: Colors.white, fontSize: 10),
+                  ))
           : Container(),
       (_runic.loading)
           ? ListTile(
@@ -405,6 +421,55 @@ class _RunicHomePageState extends State<RunicHomePage> {
                 right: 10,
                 top: 10,
               ),
+              (_runic.capabilitiesList.length > 1)
+                  ? Positioned(
+                      child: new InkWell(
+                          onTap: () async {
+                            final ImagePicker _picker = ImagePicker();
+                            final PickedFile image = await _picker.getImage(
+                                source: ImageSource.gallery);
+                            imageTwo = await _imageCap
+                                .processCameraImageFromLibrary(image, 0);
+                            setState(() {});
+                          },
+                          child: Container(
+                              color: lightColor,
+                              width: 120,
+                              height: 120 * _imageCap.height / _imageCap.width,
+                              child: imageTwo != null
+                                  ? Image.memory(imageTwo)
+                                  : Center(
+                                      child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                          Icon(Icons.image,
+                                              color: Color.fromRGBO(
+                                                  59, 188, 235, 1)),
+                                          Text(
+                                            "Upload Image",
+                                            style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    59, 188, 235, 1)),
+                                          )
+                                        ])))),
+                      right: 140,
+                      top: 10,
+                    )
+                  : Container(),
+              Positioned(
+                  right: 12,
+                  top: 12,
+                  child: Text("CAP 1",
+                      style:
+                          TextStyle(color: Color.fromRGBO(59, 188, 235, 1)))),
+              (_runic.capabilitiesList.length > 1)
+                  ? Positioned(
+                      right: 142,
+                      top: 12,
+                      child: Text("CAP 2",
+                          style: TextStyle(
+                              color: Color.fromRGBO(59, 188, 235, 1))))
+                  : Container(),
               IconButton(
                   onPressed: () {
                     initCamera(_currentCamera == 0 ? 1 : 0);
@@ -506,12 +571,21 @@ class _RunicHomePageState extends State<RunicHomePage> {
                         });
                         try {
                           if (_runic.capabilities.containsKey("4")) {
-                            Runic.inputData = _imageCap.processCameraImage(
+                            Runic.inputData = [];
+
+                            Runic.inputData.add(_imageCap.processCameraImage(
                                 _imageCap.image,
                                 (Platform.isIOS)
                                     ? 90
-                                    : 90 + _currentCamera * 180);
+                                    : 90 + _currentCamera * 180));
+                            if (imageTwo != null) {
+                              ImageCapability cap =
+                                  new ImageCapability(width: 256, height: 256);
+                              Runic.inputData
+                                  .add(cap.processLibLibrary(imageTwo));
+                            }
                           }
+
                           await _runic.runRune();
                           if (_runic.capabilities.containsKey("4")) {
                             thumb = _imageCap.getThumb();
@@ -539,7 +613,7 @@ class _RunicHomePageState extends State<RunicHomePage> {
                         while (runningContinious) {
                           try {
                             if (_runic.capabilities.containsKey("4")) {
-                              Runic.inputData = _imageCap.processCameraImage(
+                              Runic.inputData[0] = _imageCap.processCameraImage(
                                   _imageCap.image,
                                   (Platform.isIOS)
                                       ? 90

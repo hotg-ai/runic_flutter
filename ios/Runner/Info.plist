@@ -30,6 +30,8 @@
 	<string>Microphone access required</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Motion required for movement detection</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Upload image for ML inference</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

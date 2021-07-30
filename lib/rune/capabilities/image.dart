@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:io' show Platform;
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imglib;
+import 'package:image_picker/image_picker.dart';
 
 const shift = (0xFF << 24);
 
@@ -23,6 +24,35 @@ class ImageCapability {
     return Platform.isAndroid
         ? processCameraImageAndroid(image, rotation)
         : processCameraImageIOS(image, rotation);
+  }
+
+  Uint8List? processLibLibrary(Uint8List imageBytes) {
+    final img = imglib.decodeImage((imageBytes).toList());
+    print("${img.width} ${img.height}");
+    return reFormat(img);
+  }
+
+  Future<Uint8List>? processCameraImageFromLibrary(
+      PickedFile image, int rotation) async {
+    final img = imglib.decodeImage((await image.readAsBytes()).toList());
+    print("${img.width} ${img.height}");
+    imglib.Image thumbnail = imglib.copyResizeCropSquare(img, width);
+    print("${thumbnail.width} ${thumbnail.height}");
+    return Uint8List.fromList(
+        imglib.encodePng(imglib.copyRotate(thumbnail, rotation)));
+  }
+
+  Uint8List? bytesRGBtoPNG(List<int> bytes) {
+    final img = imglib.Image(width, height);
+
+    imglib.Image outImage = imglib.copyResizeCropSquare(img, width);
+    for (var i = 0; i < bytes.length; i += 3) {
+      int pos = (i / 3).round();
+      outImage.data[pos] = Uint32List.view(
+          new Uint8List.fromList([bytes[i], bytes[i + 1], bytes[i + 2], 255])
+              .buffer)[0];
+    }
+    return Uint8List.fromList(imglib.encodePng(outImage));
   }
 
   Uint8List? processCameraImageAndroid(CameraImage image, int rotation) {

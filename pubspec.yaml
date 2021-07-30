@@ -23,7 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  runevm_fl: ^0.2.0
+  runevm_fl: 
+    path: ../runevm_fl
   http: ^0.12.2
   protoc_plugin: ^19.2.0+1
   fl_chart: ^0.12.2
@@ -32,6 +33,7 @@ dependencies:
   camera: ^0.7.0
   image: ^2.1.19
   searchfield: ^0.5.2
+  image_picker: ^0.6.7
   qr_code_scanner: ^0.4.0
   path_provider: ^2.0.1
 dev_dependencies:
