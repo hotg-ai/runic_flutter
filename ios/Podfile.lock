@@ -18,6 +18,8 @@ PODS:
     - Flutter
   - sensors (0.0.1):
     - Flutter
+  - share (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - camera (from `.symlinks/plugins/camera/ios`)
@@ -29,6 +31,7 @@ DEPENDENCIES:
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - runevm_fl (from `.symlinks/plugins/runevm_fl/ios`)
   - sensors (from `.symlinks/plugins/sensors/ios`)
+  - share (from `.symlinks/plugins/share/ios`)
 
 SPEC REPOS:
   trunk:
@@ -53,6 +56,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/runevm_fl/ios"
   sensors:
     :path: ".symlinks/plugins/sensors/ios"
+  share:
+    :path: ".symlinks/plugins/share/ios"
 
 SPEC CHECKSUMS:
   camera: a0ca5080336f7af47b88436e5e26da3dee5568f0
@@ -65,7 +70,8 @@ SPEC CHECKSUMS:
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
   runevm_fl: d9949299703304fb28ef3324f416fc171d402dc6
   sensors: 84eb7a30e47a649e4172b71d6e81be614c280336
+  share: 0b2c3e82132f5888bccca3351c504d0003b3b410
 
 PODFILE CHECKSUM: 263add2a1186ccc866b6ac6b0a435b5da188577f
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.10.2

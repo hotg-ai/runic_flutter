@@ -58,9 +58,6 @@ class Runic {
 
   //Make a list since more than one cap can exist with same id
   List capabilitiesList = [];
-
-  Map capabilities = {};
-  Map parameters = {};
   String? modelOutput;
   String rawOutput = "";
   dynamic outputData = [];
@@ -144,14 +141,12 @@ class Runic {
     List<int> inputBytes = [];
     List<int> lengths = [];
     for (int i = 0; i < Runic.inputData.length; i++) {
-      print(
-          "####### Sending CAP $i with start val ${Runic.inputData[i][0]} and length ${Runic.inputData[i].length}");
       inputBytes.addAll(List.from(Runic.inputData[i]));
       lengths.add(Runic.inputData[i].length);
     }
     double input = 0;
 
-    if (capabilities.containsKey("5")) {
+    if (capabilitiesList[0]["capability"] == 5) {
       //if input is raw, generate f32 and send it as uint8list input
       Random rand = Random();
       input = (rand.nextDouble() * 2) * pi;
@@ -164,8 +159,9 @@ class Runic {
     dynamic result = "\"<MISSING>\"";
     int count = 0;
     int startMillisecond = new DateTime.now().millisecondsSinceEpoch;
-    while (count < 1 && result == "\"<MISSING>\"") {
-      result = await RunevmFl.runRune(Uint8List.fromList(inputBytes), lengths);
+    result = await RunevmFl.runRune(Uint8List.fromList(inputBytes), lengths);
+    /*while (count < 1 && result == "\"<MISSING>\"") {
+      
 
       try {
         final outJson = json.decode(result);
@@ -198,24 +194,23 @@ class Runic {
       }
       count++;
       print("retrying:$count");
-    }
+    }*/
+    return;
     //print("output: $result ${result.runtimeType.toString()}");
     int millisecs =
         new DateTime.now().millisecondsSinceEpoch - startMillisecond;
     millisecondsPerRun = max(millisecs, 1);
     runTimes.add(millisecondsPerRun);
-    if (capabilities.containsKey("5")) {
+    if (capabilitiesList[0]["capability"] == 5) {
       var out = jsonDecode(result);
       elements.add({"in": input, "out": out[0]});
-      if (capabilities.containsKey("5")) {
-        elements.sort((a, b) => a["in"].compareTo(b["in"]));
-      }
+      elements.sort((a, b) => a["in"].compareTo(b["in"]));
     }
   }
 
   Future<List> getManifest(String input) async {
     elements = [];
-    capabilities = {};
+
     capabilitiesList = [];
     try {
       dynamic output = await RunevmFl.manifest;
@@ -224,7 +219,7 @@ class Runic {
         print("mainfest output: $output");
       }
       output = json.decode(output);
-
+      print("MANIFEST: {$output}");
       for (int i = 0; i < output.length; i++) {
         int capability = output[i]["capability"];
         Map cap = {
@@ -233,17 +228,11 @@ class Runic {
           "name": capabilitiesDefinition["$capability"],
           "parameters": {}
         };
-
-        capabilities["$capability"] = capabilitiesDefinition["$capability"];
         if (output[i].containsKey("parameters")) {
-          parameters["$capability"] = {};
           for (dynamic parameter in output[i]["parameters"]) {
-            parameters["$capability"][parameter["key"]] = parameter["value"];
             cap["parameters"][parameter["key"]] = parameter["value"];
           }
         }
-        print("Capability found: $capability ${capabilities["$capability"]}");
-        print("with parameters: ${parameters["$capability"]}");
         capabilitiesList.add(cap);
         modelOutput = "SERIAL";
       }
@@ -251,7 +240,7 @@ class Runic {
       print("Error reading manifest: $e");
       return [];
     }
-
+    print("capabilitiesList: {$capabilitiesList}");
     return capabilitiesList;
   }
 

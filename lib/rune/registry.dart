@@ -49,6 +49,7 @@ class _RegistryState extends State<Registry> {
         _url = result!.code;
         _textController.text = _url;
       });
+      open({"name": _url}, true);
     });
   }
 
