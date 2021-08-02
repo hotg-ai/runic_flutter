@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:runic_mobile/rune/graphs.dart';
@@ -333,20 +334,32 @@ class _RunicHomePageState extends State<RunicHomePage> {
         (_runic.capabilitiesList.length > 0)
             ? (_runic.capabilitiesList.length > 1 &&
                     _runic.outputData.length > 0)
-                ? ListTile(
-                    title: Image.memory(_runic.getImageOut()),
-                    trailing: IconButton(
-                      icon: Icon(Icons.share,
-                          color: Color.fromRGBO(59, 188, 235, 1)),
-                      onPressed: () async {
-                        final directory = await getTemporaryDirectory();
-                        await new File(directory.path + "/image_out.png")
-                            .writeAsBytes(_runic.getImageOut());
-                        Share.shareFiles(['${directory.path}/image_out.png'],
-                            text: 'Runic image');
-                      },
-                    ),
-                  )
+                ? Stack(children: [
+                    Image.memory(_runic.getImageOut()),
+                    Positioned(
+                        top: 5,
+                        right: 10,
+                        child: TextButton.icon(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Color.fromRGBO(0, 0, 0, 0.2))),
+                          label: Text(
+                            "Share",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
+                          icon: Icon(Icons.share, color: Colors.white),
+                          onPressed: () async {
+                            final directory = await getTemporaryDirectory();
+                            await new File(directory.path + "/image_out.png")
+                                .writeAsBytes(_runic.getImageOut());
+                            Share.shareFiles(
+                                ['${directory.path}/image_out.png'],
+                                text: 'Runic image');
+                          },
+                        )),
+                  ])
                 : ListTile(
                     dense: true,
                     leading: Icon(
@@ -404,22 +417,27 @@ class _RunicHomePageState extends State<RunicHomePage> {
       }
 
       if (_runic.capabilitiesList.length > 0) {
+        int c = 0;
+        for (Map cap in _runic.capabilitiesList) {
+          runeTiles.add(ListTile(
+            dense: true,
+            leading: Icon(
+              Icons.input,
+              color: Color.fromRGBO(59, 188, 235, 1),
+            ),
+            title: Text(
+              "Capability #$c ${cap["name"]}",
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: Text(
+              "${cap["parameters"]}",
+              style: TextStyle(color: Colors.white, fontSize: 10),
+            ),
+          ));
+          c++;
+        }
+
         Map cap = _runic.capabilitiesList[0];
-        runeTiles.add(ListTile(
-          dense: true,
-          leading: Icon(
-            Icons.input,
-            color: Color.fromRGBO(59, 188, 235, 1),
-          ),
-          title: Text(
-            "${cap["name"]}",
-            style: TextStyle(color: Colors.white),
-          ),
-          subtitle: Text(
-            "${cap["parameters"]}",
-            style: TextStyle(color: Colors.white, fontSize: 10),
-          ),
-        ));
         if (cap["capability"] == 4) {
           //VIDEO!
           inputWidgets.add(

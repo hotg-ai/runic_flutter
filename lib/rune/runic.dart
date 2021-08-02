@@ -159,11 +159,11 @@ class Runic {
     dynamic result = "\"<MISSING>\"";
     int count = 0;
     int startMillisecond = new DateTime.now().millisecondsSinceEpoch;
-    result = await RunevmFl.runRune(Uint8List.fromList(inputBytes), lengths);
-    /*while (count < 1 && result == "\"<MISSING>\"") {
-      
 
+    while (count < 1 && result == "\"<MISSING>\"") {
       try {
+        result =
+            await RunevmFl.runRune(Uint8List.fromList(inputBytes), lengths);
         final outJson = json.decode(result);
         if (outJson.runtimeType.toString().contains("List")) {
           //need to add more type checks
@@ -194,8 +194,7 @@ class Runic {
       }
       count++;
       print("retrying:$count");
-    }*/
-    return;
+    }
     //print("output: $result ${result.runtimeType.toString()}");
     int millisecs =
         new DateTime.now().millisecondsSinceEpoch - startMillisecond;
