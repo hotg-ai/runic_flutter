@@ -48,11 +48,38 @@
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/sensors/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/sensors/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/sensors/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/qr_code_scanner/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/qr_code_scanner/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/qr_code_scanner/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/path_provider/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/path_provider/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/path_provider/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/share/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/share/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/share/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/runevm_fl/android/build-android-rel-arm64-v8a/flatbuffers/dart/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/runevm_fl/android/build-android-rel-arm64-v8a/flatbuffers/dart/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/runevm_fl/android/build-android-rel-arm64-v8a/flatbuffers/dart/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/share/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/share/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/share/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/path_provider/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/path_provider/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/path_provider/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/qr_code_scanner/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/qr_code_scanner/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/qr_code_scanner/example/.dart_tool" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
-    <orderEntry type="library" name="Dart Packages" level="project" />
     <orderEntry type="library" name="Flutter Plugins" level="project" />
+    <orderEntry type="library" name="Dart Packages" level="project" />
   </component>
 </module>
