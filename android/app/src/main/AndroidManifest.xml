@@ -1,11 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ai.hotg.runicapp">
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    package="com.example.runic_flutter">
    <application
-        android:label="runic_mobile"
-        android:icon="@mipmap/ic_launcher">
+        android:label="runic_flutter"
+        android:icon="@mipmap/appicon2">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
