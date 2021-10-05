@@ -5,7 +5,9 @@ import 'package:glassmorphism/glassmorphism.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/registry.dart';
+import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/rune_screen.dart';
+import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/utils/navigation_bar_clipper.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:blur/blur.dart';
@@ -23,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    print("initState()");
     fetchRegistry();
   }
 
@@ -267,14 +268,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       loading = true;
                                     });
 
-                                    RuneScreen.runeBytes =
+                                    RuneEngine.runeBytes =
                                         await Registry.downloadWASM(
                                             'https://rune-registry.web.app/registry/' +
                                                 searchList[index]["name"] +
                                                 '/rune.rune');
-                                    print(
-                                        "Rune loaded: ${RuneScreen.runeBytes.length}");
-
+                                    RuneEngine.runeMeta = searchList[index];
                                     setState(() {
                                       loading = false;
                                     });
@@ -337,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             .centerLeft,
                                                         child: new Text(
                                                           searchList[index]
-                                                              ['description'],
+                                                              ['name'],
                                                           textAlign:
                                                               TextAlign.left,
                                                           style: TextStyle(
@@ -356,30 +355,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   //Container(height: 80)
                 ],
               )),
-          loading
-              ? Center(
-                  child: Container(
-                      width: 84,
-                      height: 84,
-                      child: LoadingIndicator(
-                          indicatorType: Indicator.orbit,
-
-                          /// Required, The loading type of the widget
-                          colors: [Colors.white.withAlpha(50)],
-
-                          /// Optional, The color collections
-                          strokeWidth: 2,
-
-                          /// Optional, The stroke of the line, only applicable to widget which contains line
-                          backgroundColor: Colors.transparent,
-
-                          /// Optional, Background of the widget
-                          pathBackgroundColor: Colors.transparent
-
-                          /// Optional, the stroke backgroundColor
-                          )))
-              : Container(),
-          MainMenu()
+          MainMenu(),
+          loading ? LoadingScreen() : Container(),
         ]));
   }
 }

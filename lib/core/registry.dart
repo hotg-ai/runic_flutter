@@ -30,7 +30,7 @@ class Registry {
         // then parse the JSON.
         runes = List<dynamic>.from(jsonDecode(response.body));
         //filter on runes with web compatibility
-        //runes = runes.where((element) => element["web"] == true).toList();
+        runes = runes.where((element) => element["web"] == true).toList();
         //print(runes);
       } else {
         // If the server did not return a 200 OK response,

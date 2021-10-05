@@ -6,11 +6,11 @@ import 'package:image/image.dart' as ImageLib;
 class ImageUtils {
   static Uint8List convertImage(
       Uint8List data, Map<String, dynamic> parameters) {
-    print(parameters["width"]);
     ImageLib.Image decodedImage = ImageLib.copyResizeCropSquare(
         ImageLib.decodeImage(data)!, parameters["width"]);
 
-    //List<int> thumb = ImageLib.writePng(decodedImage);
+    List<int> thumb = ImageLib.writePng(decodedImage);
+
     //remove alpha channel & int to float
     List<int> input = [];
     int c = 0;
@@ -27,10 +27,11 @@ class ImageUtils {
         }
       }
     }
+
     return new Uint8List.fromList(input);
   }
 
-  static Uint8List bytesRGBtoPNG(List<double> bytes) {
+  static Uint8List bytesRGBtoPNG(List bytes) {
     int size = sqrt(bytes.length / 3).round();
     print("image output size $size");
     print("${bytes.sublist(0, 10)}");

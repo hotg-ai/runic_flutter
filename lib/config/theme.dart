@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 
-const darkBackGroundColor = Color.fromRGBO(34, 28, 64, 1.0);
+const darkBackGroundColor =
+    Color.fromRGBO(24, 20, 30, 1.0); //Color.fromRGBO(34, 28, 64, 1.0);
 const indigoBlueColor = Color.fromRGBO(87, 30, 179, 1.0);
 const barneyPurpleColor = Color.fromRGBO(179, 0, 161, 1.0);
 const whiteAlpha = Color.fromRGBO(255, 255, 255, 0.4);

@@ -7,8 +7,13 @@ import 'package:runic_flutter/config/theme.dart';
 const shapeCount = 4;
 const repeats = 2;
 
+enum Screen { splash, main }
+
 class Background extends StatelessWidget {
   // This widget is the root of your application.
+  Screen screen;
+  Background({this.screen = Screen.main});
+
   final List<Offset> positions = [];
 
   generatePositions(double width, double height) {
@@ -32,20 +37,34 @@ class Background extends StatelessWidget {
         shapes.add(Positioned(
           left: positions[i + r * shapeCount].dx,
           top: positions[i + r * shapeCount].dy,
-          child: Image.asset(
-            "assets/images/background_shapes/shape_${i + 1}.png",
-            width: 300 * Random().nextDouble(),
+          child: Opacity(
+            opacity: 0.5,
+            child: Image.asset(
+              (screen == Screen.splash)
+                  ? "assets/images/background_shapes/splash_shape_${i + 1}.png"
+                  : "assets/images/background_shapes/shape_${i + 1}.png",
+              width: 200 * Random().nextDouble(),
+            ),
           ),
         ));
       }
     }
     shapes.add(GlassmorphicContainer(
-      borderRadius: 0,
-      blur: 10,
+      margin: EdgeInsets.fromLTRB(
+          screen == Screen.splash ? 42 : 0,
+          screen == Screen.splash ? 84 : 0,
+          screen == Screen.splash ? 42 : 0,
+          screen == Screen.splash ? 84 : 0),
+      borderRadius: screen == Screen.splash ? 21 : 0,
+      blur: 8,
       border: 0,
       linearGradient: LinearGradient(colors: [
-        darkBackGroundColor.withAlpha(100),
-        darkBackGroundColor.withAlpha(20),
+        screen == Screen.splash
+            ? Colors.white.withAlpha(25)
+            : darkBackGroundColor.withAlpha(100),
+        screen == Screen.splash
+            ? Colors.white.withAlpha(15)
+            : darkBackGroundColor.withAlpha(20),
       ], begin: Alignment.topLeft, end: Alignment.bottomRight),
       borderGradient:
           LinearGradient(colors: [darkBackGroundColor, darkBackGroundColor]),
