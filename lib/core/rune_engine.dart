@@ -14,7 +14,7 @@ class RuneEngine {
   //Rune
   static List<dynamic> manifest = [];
   static List<ImageCap> capabilities = [];
-
+  static String? url;
   static load() async {
     RuneEngine.output = {"type": "none", "output": "-"};
     //Rune
