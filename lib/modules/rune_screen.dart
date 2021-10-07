@@ -124,6 +124,7 @@ class _RuneScreenState extends State<RuneScreen> {
                           child: ImageCapabilityWidget(
                             cap: RuneEngine.capabilities[index],
                             notifyParent: refresh,
+                            single: RuneEngine.capabilities.length <= 1,
                           ));
                     }
                     if (index == RuneEngine.manifest.length) {

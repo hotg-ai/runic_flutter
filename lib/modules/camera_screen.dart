@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:blur/blur.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -32,7 +33,9 @@ class _CameraScreenState extends State<CameraScreen>
   XFile? videoFile;
   bool show = true;
   bool showRest = true;
-
+  bool flash = false;
+  int camera = 0;
+  bool live = true;
   @override
   void initState() {
     super.initState();
@@ -120,6 +123,7 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
+    print(cameraDescription);
     if (controller != null) {
       await controller!.dispose();
     }
@@ -131,7 +135,7 @@ class _CameraScreenState extends State<CameraScreen>
     );
 
     controller = cameraController;
-
+    cameraController.setFlashMode(flash ? FlashMode.auto : FlashMode.off);
     // If the controller is updated then update the UI.
     cameraController.addListener(() {
       if (mounted) setState(() {});
@@ -189,7 +193,17 @@ class _CameraScreenState extends State<CameraScreen>
     for (CameraDescription cameraDescription in cameras) {
       print("$cameraDescription");
     }
-    onNewCameraSelected(cameras.last);
+    onNewCameraSelected(cameras[camera]);
+  }
+
+  switchCamera() {
+    camera++;
+    if (camera == cameras.length) {
+      camera = 0;
+    }
+    print(camera);
+    print(cameras.length);
+    onNewCameraSelected(cameras[camera]);
   }
 
   run() async {
@@ -224,7 +238,7 @@ class _CameraScreenState extends State<CameraScreen>
             showBackButton
                 ? Positioned(
                     left: 21,
-                    top: 21,
+                    top: 42,
                     height: 42,
                     width: 42,
                     child: IconButton(
@@ -261,7 +275,17 @@ class _CameraScreenState extends State<CameraScreen>
                     left: 50,
                     right: 50,
                     child: Row(children: [
-                      Expanded(child: Container()),
+                      Expanded(
+                          child: Container(
+                              child: IconButton(
+                        icon: (flash)
+                            ? Icon(Icons.flash_on, color: darkGreyBlue)
+                            : Icon(Icons.flash_off, color: darkGreyBlue),
+                        onPressed: () {
+                          flash = !flash;
+                          onNewCameraSelected(cameras[camera]);
+                        },
+                      ))),
                       InkWell(
                           onTap: () {
                             run();
@@ -282,46 +306,50 @@ class _CameraScreenState extends State<CameraScreen>
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(14)),
                                       color: const Color(0xffff00e5))))),
-                      Expanded(child: Container())
+                      Expanded(
+                          child: Container(
+                              child: IconButton(
+                        icon: Image.asset("assets/images/icons/reload.png"),
+                        onPressed: () {
+                          switchCamera();
+                        },
+                      )))
                     ]))
                 : Container(),
             //results
             showBackButton && RuneEngine.output["type"] != "none"
                 ? Positioned(
-                    top: 40,
-                    height: RuneEngine.output["type"] == "Image" ? 160 : 42,
-                    left: 50,
-                    right: 50,
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: RuneEngine.output["type"] == "Image"
-                            ? Image.memory(
-                                RuneEngine.output["output"],
-                                fit: BoxFit.cover,
-                              )
-                            : Blur(
-                                blur: 10,
-                                blurColor: Colors.white24,
-                                colorOpacity: 0.2,
-                                child: Container(
-                                  color: darkBlueBlue.withAlpha(0),
-                                ))))
+                    top: 100,
+                    height: 82,
+                    left: 0,
+                    right: 0,
+                    child: RuneEngine.output["type"] == "Image"
+                        ? Image.memory(
+                            RuneEngine.output["output"],
+                            fit: BoxFit.cover,
+                          )
+                        : Blur(
+                            blur: 10,
+                            blurColor: Colors.white24,
+                            colorOpacity: 0.2,
+                            child: Container(
+                              color: darkBlueBlue.withAlpha(0),
+                            )))
                 : Container(),
             showBackButton && RuneEngine.output["type"] == "String"
                 ? Positioned(
-                    top: 40,
-                    height: 42,
-                    left: 50,
-                    right: 50,
+                    top: 100,
+                    height: 82,
+                    left: 0,
+                    right: 0,
                     child: Row(children: [
-                      Expanded(child: Container()),
-                      Container(
-                          child: Text("${RuneEngine.output}",
+                      Expanded(
+                          child: Text("${RuneEngine.output["output"]}",
                               maxLines: 2,
                               overflow: TextOverflow.clip,
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontSize: 12, color: Colors.white))),
-                      Expanded(child: Container())
                     ]))
                 : Container()
           ])),

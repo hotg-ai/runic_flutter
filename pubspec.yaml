@@ -31,6 +31,7 @@ dependencies:
   image: ^3.0.5
   loading_indicator: ^3.0.2
   image_picker: ^0.8.4+2
+  ai_barcode: ^3.0.1
   runevm_fl:
     # When depending on this package from a real application you should use:
     #   runevm_fl: ^x.y.z
@@ -58,6 +59,7 @@ flutter:
   assets:
     - assets/images/background_shapes/
     - assets/images/icons/
+    - assets/images/
     - assets/images/splash/
     - assets/images/rune_placeholder.png
 

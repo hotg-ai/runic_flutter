@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
@@ -14,9 +16,12 @@ class RuneEngine {
   static List<ImageCap> capabilities = [];
 
   static load() async {
+    RuneEngine.output = {"type": "none", "output": "-"};
+    //Rune
     await RunevmFl.load(RuneEngine.runeBytes);
-    manifest = jsonDecode(await RunevmFl.manifest);
+    manifest = await RunevmFl.manifest;
     capabilities = [];
+    print(manifest);
     for (dynamic _cap in manifest) {
       ImageCap imageCap = new ImageCap();
       imageCap.parameters = _cap;
@@ -40,9 +45,17 @@ class RuneEngine {
     if (runeOutput is String) {
       RuneEngine.output = {"type": "String", "output": "$runeOutput"};
       if (RuneEngine.output["type"] == "String") {
-        if (json.decode(RuneEngine.output["output"]).containsKey("elements")) {
-          RuneEngine.output["output"] =
-              "${json.decode(RuneEngine.output["output"])["elements"]}";
+        dynamic out = json.decode(RuneEngine.output["output"]);
+        print(out);
+        if (out.containsKey("elements")) {
+          if (out["elements"].length > 100) {
+            RuneEngine.output["type"] = "Image";
+            RuneEngine.output["output"] =
+                ImageUtils.bytesRGBtoPNG(out["elements"]);
+          } else {
+            RuneEngine.output["output"] =
+                "${json.decode(RuneEngine.output["output"])["elements"]}";
+          }
         }
       }
     } else if (runeOutput is List) {
