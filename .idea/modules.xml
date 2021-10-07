@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/runic_flutter.iml" filepath="$PROJECT_DIR$/.idea/runic_flutter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/runic_flutter.iml" filepath="$PROJECT_DIR$/runic_flutter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/runic_flutter_android.iml" filepath="$PROJECT_DIR$/android/runic_flutter_android.iml" />
     </modules>
   </component>
 </project>

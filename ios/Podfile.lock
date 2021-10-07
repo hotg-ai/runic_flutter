@@ -1,77 +1,47 @@
 PODS:
+  - ai_barcode (0.0.1):
+    - Flutter
+    - MTBBarcodeScanner
   - camera (0.0.1):
     - Flutter
   - Flutter (1.0.0)
   - image_picker (0.0.1):
     - Flutter
-  - mic_stream (0.0.1):
-    - Flutter
   - MTBBarcodeScanner (5.0.11)
-  - path_provider (0.0.1):
-    - Flutter
-  - "permission_handler (5.1.0+2)":
-    - Flutter
-  - qr_code_scanner (0.2.0):
-    - Flutter
-    - MTBBarcodeScanner
   - runevm_fl (0.0.1):
-    - Flutter
-  - sensors (0.0.1):
-    - Flutter
-  - share (0.0.1):
     - Flutter
 
 DEPENDENCIES:
+  - ai_barcode (from `.symlinks/plugins/ai_barcode/ios`)
   - camera (from `.symlinks/plugins/camera/ios`)
   - Flutter (from `Flutter`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
-  - mic_stream (from `.symlinks/plugins/mic_stream/ios`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
-  - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - runevm_fl (from `.symlinks/plugins/runevm_fl/ios`)
-  - sensors (from `.symlinks/plugins/sensors/ios`)
-  - share (from `.symlinks/plugins/share/ios`)
 
 SPEC REPOS:
   trunk:
     - MTBBarcodeScanner
 
 EXTERNAL SOURCES:
+  ai_barcode:
+    :path: ".symlinks/plugins/ai_barcode/ios"
   camera:
     :path: ".symlinks/plugins/camera/ios"
   Flutter:
     :path: Flutter
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
-  mic_stream:
-    :path: ".symlinks/plugins/mic_stream/ios"
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
-  permission_handler:
-    :path: ".symlinks/plugins/permission_handler/ios"
-  qr_code_scanner:
-    :path: ".symlinks/plugins/qr_code_scanner/ios"
   runevm_fl:
     :path: ".symlinks/plugins/runevm_fl/ios"
-  sensors:
-    :path: ".symlinks/plugins/sensors/ios"
-  share:
-    :path: ".symlinks/plugins/share/ios"
 
 SPEC CHECKSUMS:
-  camera: a0ca5080336f7af47b88436e5e26da3dee5568f0
-  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
-  mic_stream: 9e7c9fe19d0d8bd0d273bd5428bbd13cab6f4429
+  ai_barcode: 67fb0a7b732dbb87e92b59bb90a438db9383fa2f
+  camera: b9eb73c055259c6f808a9da4a0d43780f6645281
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  image_picker: 9aa50e1d8cdacdbed739e925b7eea16d014367e6
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
-  permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
-  qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
-  runevm_fl: d9949299703304fb28ef3324f416fc171d402dc6
-  sensors: 84eb7a30e47a649e4172b71d6e81be614c280336
-  share: 0b2c3e82132f5888bccca3351c504d0003b3b410
+  runevm_fl: c71862cca794d7742220fcae7383c6fd365b16d7
 
-PODFILE CHECKSUM: 263add2a1186ccc866b6ac6b0a435b5da188577f
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.10.2

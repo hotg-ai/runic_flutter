@@ -1,15 +1,9 @@
 # This is a generated file; do not edit or check into version control.
-camera=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.7.0+4/
-flutter_plugin_android_lifecycle=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-1.0.11/
-image_picker=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.6.7+22/
-import_js_library=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/import_js_library-1.0.2/
-mic_stream=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/mic_stream-0.4.0/
-path_provider=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-2.0.2/
-path_provider_linux=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.0.2/
-path_provider_macos=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_macos-2.0.2/
-path_provider_windows=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.0.3/
-permission_handler=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.1.0+2/
-qr_code_scanner=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/qr_code_scanner-0.4.0/
+ai_barcode=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/ai_barcode-3.0.1/
+ai_barcode_web=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/ai_barcode_web-3.0.0/
+camera=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.9.4/
+camera_web=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera_web-0.2.1+1/
+flutter_plugin_android_lifecycle=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.3/
+image_picker=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.8.4+2/
+image_picker_for_web=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_for_web-2.1.3/
 runevm_fl=/Users/geerttrooskens/dev/hotg/runevm_fl/
-sensors=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/sensors-0.4.2+6/
-share=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/share-2.0.4/

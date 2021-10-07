@@ -1,43 +1,44 @@
-// @dart=2.9
+import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:runic_mobile/rune/runic.dart';
-import 'rune/registry.dart';
+import 'package:runic_flutter/core/registry.dart';
+import 'package:runic_flutter/core/rune_engine.dart';
+import 'package:runic_flutter/modules/home_screen.dart';
+import 'package:runic_flutter/modules/profile_screen.dart';
+import 'package:runic_flutter/modules/rune_screen.dart';
+import 'package:runic_flutter/modules/splash_screen.dart';
+import 'package:runic_flutter/modules/url_loading_screen.dart';
 
 void main() async {
+  if (kIsWeb) {
+    //check if rune url parameter is present.
+    String uri = Uri.base.query;
+    print(uri);
+    List<String> parts = uri.split("url=");
+    print(parts);
+    if (parts.length == 2) {
+      RuneEngine.url = parts[1];
+      print(RuneEngine.url);
+    }
+  }
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Runic.fetchRegistry();
-  runApp(RunicApp());
+  runApp(MyApp());
 }
 
-class RunicApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Runic',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: RunicMainPage(title: 'Runic'),
+      initialRoute: RuneEngine.url != null ? 'url' : 'splash',
+      routes: {
+        'splash': (context) => SplashScreen(),
+        'home': (context) => HomeScreen(),
+        'profile': (context) => ProfileScreen(),
+        'rune': (context) => RuneScreen(),
+        'url': (context) => URLLoadingScreen()
+      },
     );
-  }
-}
-
-class RunicMainPage extends StatefulWidget {
-  RunicMainPage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _RunicMainPageState createState() => _RunicMainPageState();
-}
-
-class _RunicMainPageState extends State<RunicMainPage> {
-  @override
-  Widget build(BuildContext context) {
-    return (Runic.runes.length > 0)
-        ? Registry(registry: Runic.runes)
-        : Container(color: Color.fromRGBO(59, 188, 235, 1));
   }
 }
