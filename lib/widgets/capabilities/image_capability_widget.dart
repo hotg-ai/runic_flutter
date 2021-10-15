@@ -34,9 +34,11 @@ class ImageCapabilityWidget extends StatelessWidget {
                             final ImagePicker _picker = ImagePicker();
                             final XFile? image = await _picker.pickImage(
                                 source: ImageSource.gallery);
-                            cap.thumb = await image?.readAsBytes();
-                            cap.raw = ImageUtils.convertImage(
-                                cap.thumb!, cap.parameters);
+                            List<Uint8List> data = ImageUtils.convertImage(
+                                await image!.readAsBytes(), cap.parameters);
+                            cap.thumb = data[1];
+                            cap.raw = data[0];
+
                             notifyParent();
                           },
                           elevation: 0.0,
@@ -45,7 +47,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                               "assets/images/btn_take_picture.png")))))
           : Container(),
       Container(
-        height: single ? 21 : 0,
+        height: single ? 11 : 0,
       ),
       single
           ? Center(
@@ -72,7 +74,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                               Image.asset("assets/images/btn_live_mode.png")))))
           : Container(),
       Container(
-        height: single ? 21 : 0,
+        height: single ? 11 : 0,
       ),
       (!single || cap.thumb != null)
           ? new Card(
@@ -131,9 +133,12 @@ class ImageCapabilityWidget extends StatelessWidget {
                                         final XFile? image =
                                             await _picker.pickImage(
                                                 source: ImageSource.gallery);
-                                        cap.thumb = await image?.readAsBytes();
-                                        cap.raw = ImageUtils.convertImage(
-                                            cap.thumb!, cap.parameters);
+                                        List<Uint8List> data =
+                                            ImageUtils.convertImage(
+                                                await image!.readAsBytes(),
+                                                cap.parameters);
+                                        cap.thumb = data[1];
+                                        cap.raw = data[0];
                                         notifyParent();
                                       },
                                     ),

@@ -5,12 +5,16 @@ import 'package:blur/blur.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/main.dart';
+import 'package:runic_flutter/modules/result_screen.dart';
+import 'package:runic_flutter/modules/rune_screen.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
+import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
@@ -28,17 +32,19 @@ class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   CameraController? controller;
   List<CameraDescription> cameras = [];
-  bool enableAudio = true;
+  bool enableAudio = false;
   XFile? imageFile;
   XFile? videoFile;
   bool show = true;
   bool showRest = true;
   bool flash = false;
   int camera = 0;
-  bool live = true;
+  bool live = false;
+  bool loading = false;
   @override
   void initState() {
     super.initState();
+    _ambiguate(WidgetsBinding.instance)?.addObserver(this);
     initCam();
   }
 
@@ -95,12 +101,17 @@ class _CameraScreenState extends State<CameraScreen>
       }
       return CameraPreview(
         controller!,
+        child: RuneEngine.output["type"] == "Objects"
+            ? CustomPaint(
+                painter: ShapePainter(RuneEngine.objects), child: Container())
+            : Container(),
       );
     }
   }
 
   @override
   void dispose() {
+    _ambiguate(WidgetsBinding.instance)?.removeObserver(this);
     controller?.dispose();
     super.dispose();
   }
@@ -122,6 +133,11 @@ class _CameraScreenState extends State<CameraScreen>
     super.didChangeAppLifecycleState(state);
   }
 
+  double _minAvailableExposureOffset = 0.0;
+  double _maxAvailableExposureOffset = 0.0;
+  double _minAvailableZoom = 1.0;
+  double _maxAvailableZoom = 1.0;
+
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     print(cameraDescription);
     if (controller != null) {
@@ -131,14 +147,15 @@ class _CameraScreenState extends State<CameraScreen>
     final CameraController cameraController = CameraController(
       cameraDescription,
       kIsWeb ? ResolutionPreset.low : ResolutionPreset.low,
-      enableAudio: enableAudio,
+      enableAudio: false,
     );
 
     controller = cameraController;
     cameraController.setFlashMode(flash ? FlashMode.auto : FlashMode.off);
     // If the controller is updated then update the UI.
     cameraController.addListener(() {
-      if (mounted) setState(() {});
+      print("async $mounted");
+      setState(() {});
       if (cameraController.value.hasError) {
         print('Camera error ${cameraController.value.errorDescription}');
         //showInSnackBar(
@@ -150,7 +167,22 @@ class _CameraScreenState extends State<CameraScreen>
       await cameraController.initialize();
       await Future.wait([
         // The exposure mode is currently not supported on the web.
-        ...(!kIsWeb ? [] : []),
+        ...(!kIsWeb
+            ? [
+                cameraController
+                    .getMinExposureOffset()
+                    .then((value) => _minAvailableExposureOffset = value),
+                cameraController
+                    .getMaxExposureOffset()
+                    .then((value) => _maxAvailableExposureOffset = value)
+              ]
+            : []),
+        cameraController
+            .getMaxZoomLevel()
+            .then((value) => _maxAvailableZoom = value),
+        cameraController
+            .getMinZoomLevel()
+            .then((value) => _minAvailableZoom = value),
       ]);
     } on CameraException catch (e) {
       _showCameraException(e);
@@ -201,21 +233,34 @@ class _CameraScreenState extends State<CameraScreen>
     if (camera == cameras.length) {
       camera = 0;
     }
-    print(camera);
-    print(cameras.length);
     onNewCameraSelected(cameras[camera]);
   }
 
   run() async {
+    loading = true;
+    setState(() {});
     XFile shot = await controller!.takePicture();
     Uint8List rawImage = await shot.readAsBytes();
-    widget.cap.thumb = rawImage;
-    Uint8List bytes = ImageUtils.convertImage(rawImage, widget.cap.parameters);
+    List<Uint8List> data =
+        ImageUtils.convertImage(rawImage, widget.cap.parameters);
+    widget.cap.thumb = data[1];
+    Uint8List bytes = data[0];
     widget.cap.raw = bytes;
 
     await RuneEngine.run();
-
+    loading = false;
     setState(() {});
+    if (RuneEngine.output["type"] != "Image" && controller != null && live) {
+      new Future.delayed(const Duration(milliseconds: 100), () {
+        run();
+      });
+    }
+    if (RuneEngine.output["type"] == "Image") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ResultScreen()),
+      );
+    }
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -288,7 +333,15 @@ class _CameraScreenState extends State<CameraScreen>
                       ))),
                       InkWell(
                           onTap: () {
-                            run();
+                            if (RuneEngine.output["type"] != "Image") {
+                              live = !live;
+                              if (live) {
+                                run();
+                              }
+                            } else {
+                              live = false;
+                              run();
+                            }
                           },
                           child: Container(
                               padding: EdgeInsets.all(12),
@@ -302,6 +355,11 @@ class _CameraScreenState extends State<CameraScreen>
                               child: Container(
                                   width: 36,
                                   height: 36,
+                                  child: Icon(
+                                    live ? Icons.stop : Icons.play_arrow,
+                                    color: darkGreyBlue,
+                                    size: 21,
+                                  ),
                                   decoration: BoxDecoration(
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(14)),
@@ -317,24 +375,19 @@ class _CameraScreenState extends State<CameraScreen>
                     ]))
                 : Container(),
             //results
-            showBackButton && RuneEngine.output["type"] != "none"
+            showBackButton && RuneEngine.output["type"] == "String"
                 ? Positioned(
                     top: 100,
                     height: 82,
                     left: 0,
                     right: 0,
-                    child: RuneEngine.output["type"] == "Image"
-                        ? Image.memory(
-                            RuneEngine.output["output"],
-                            fit: BoxFit.cover,
-                          )
-                        : Blur(
-                            blur: 10,
-                            blurColor: Colors.white24,
-                            colorOpacity: 0.2,
-                            child: Container(
-                              color: darkBlueBlue.withAlpha(0),
-                            )))
+                    child: Blur(
+                        blur: 10,
+                        blurColor: Colors.white24,
+                        colorOpacity: 0.2,
+                        child: Container(
+                          color: darkBlueBlue.withAlpha(0),
+                        )))
                 : Container(),
             showBackButton && RuneEngine.output["type"] == "String"
                 ? Positioned(
@@ -349,10 +402,33 @@ class _CameraScreenState extends State<CameraScreen>
                               overflow: TextOverflow.clip,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  fontSize: 12, color: Colors.white))),
+                                fontSize: 12,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                              )))
                     ]))
-                : Container()
+                : Container(),
+            showBackButton && (loading || RuneEngine.executionTime > 0.0)
+                ? Positioned(
+                    bottom: 20,
+                    height: 82,
+                    left: 0,
+                    right: 0,
+                    child: loading &&
+                            (RuneEngine.executionTime > 250 ||
+                                RuneEngine.executionTime == 0)
+                        ? LoadingScreen()
+                        : Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                                "${RuneEngine.executionTime.round()} ms",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.white))))
+                : Container(),
           ])),
     );
   }
 }
+
+T? _ambiguate<T>(T? value) => value;

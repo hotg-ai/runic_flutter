@@ -328,6 +328,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   'https://rune-registry.web.app/registry/' +
                                       searchList[index]["name"] +
                                       '/rune.rune');
+                              print('https://rune-registry.web.app/registry/' +
+                                  searchList[index]["name"] +
+                                  '/rune.rune');
                               RuneEngine.runeMeta = searchList[index];
                               setState(() {
                                 loading = false;
