@@ -145,10 +145,8 @@ class _CameraScreenState extends State<CameraScreen>
     }
 
     final CameraController cameraController = CameraController(
-      cameraDescription,
-      kIsWeb ? ResolutionPreset.low : ResolutionPreset.low,
-      enableAudio: false,
-    );
+        cameraDescription, kIsWeb ? ResolutionPreset.low : ResolutionPreset.low,
+        enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
 
     controller = cameraController;
     cameraController.setFlashMode(flash ? FlashMode.auto : FlashMode.off);

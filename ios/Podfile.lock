@@ -2,9 +2,19 @@ PODS:
   - ai_barcode (0.0.1):
     - Flutter
     - MTBBarcodeScanner
+  - AppAuth (1.4.0):
+    - AppAuth/Core (= 1.4.0)
+    - AppAuth/ExternalUserAgent (= 1.4.0)
+  - AppAuth/Core (1.4.0)
+  - AppAuth/ExternalUserAgent (1.4.0)
   - camera (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - flutter_appauth (0.0.1):
+    - AppAuth (= 1.4.0)
+    - Flutter
+  - flutter_secure_storage (3.3.1):
+    - Flutter
   - image_picker (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
@@ -21,6 +31,8 @@ DEPENDENCIES:
   - ai_barcode (from `.symlinks/plugins/ai_barcode/ios`)
   - camera (from `.symlinks/plugins/camera/ios`)
   - Flutter (from `Flutter`)
+  - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - runevm_fl (from `.symlinks/plugins/runevm_fl/ios`)
@@ -29,6 +41,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppAuth
     - MTBBarcodeScanner
 
 EXTERNAL SOURCES:
@@ -38,6 +51,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/camera/ios"
   Flutter:
     :path: Flutter
+  flutter_appauth:
+    :path: ".symlinks/plugins/flutter_appauth/ios"
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
   path_provider:
@@ -51,8 +68,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   ai_barcode: 67fb0a7b732dbb87e92b59bb90a438db9383fa2f
+  AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   camera: b9eb73c055259c6f808a9da4a0d43780f6645281
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  flutter_appauth: 05c3778a1e4ae23364dd2ef37cbae14b244f646b
+  flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   image_picker: 9aa50e1d8cdacdbed739e925b7eea16d014367e6
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   path_provider: d1e9807085df1f9cc9318206cd649dc0b76be3de
