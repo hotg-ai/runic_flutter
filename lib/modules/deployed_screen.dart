@@ -15,20 +15,19 @@ import 'package:blur/blur.dart';
 import 'package:runic_flutter/widgets/barcode_scanner.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key? key}) : super(key: key);
+class DeployedScreen extends StatefulWidget {
+  DeployedScreen({Key? key}) : super(key: key);
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _DeployedScreenState createState() => _DeployedScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _DeployedScreenState extends State<DeployedScreen> {
   List<dynamic> searchList = [];
   bool loading = false;
   @override
   void initState() {
     super.initState();
     fetchRegistry();
-    login();
   }
 
   void fetchRegistry() async {
@@ -36,16 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       searchList = Registry.runes;
     });
-  }
-
-  void login() async {
-    await HFAuth.init();
-    if (HFAuth.isLoggedIn) {
-      print("AUTH0logged in with ${HFAuth.profile}");
-    } else {
-      await HFAuth.login();
-    }
-    setState(() {});
   }
 
   String searchString = "";
@@ -78,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.transparent,
           leading: Container(),
           title: Text(
-            'Welcome To the Rune Tinyverse',
+            'Your deployed runes',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           actions: [
@@ -235,16 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Container(
                   child: Text(
-                    'Checkout our Runes',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ),
-                Container(
-                  child: Text(
-                    'These are the ones we made for you',
+                    'Yunes deployed in the app by you',
                     style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,

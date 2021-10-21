@@ -1,12 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_appauth/flutter_appauth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/widgets/background.dart';
-import 'package:runic_flutter/widgets/main_menu.dart';
-import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class SplashScreen extends StatefulWidget {
   static int screen = 0;
@@ -16,77 +11,23 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-const AUTH0_DOMAIN = 'dev-1qev9owo.us.auth0.com';
-final authorizationEndpoint = Uri.parse('https://$AUTH0_DOMAIN/authorize');
-final tokenEndpoint = Uri.parse('https://$AUTH0_DOMAIN/oauth/token');
-
-const AUTH0_CLIENT_ID = 'S71L2EvzSTEiSAuEXg4D0wk6KCuMOr6f';
-
-const AUTH0_REDIRECT_URI = 'com.auth0.flutterdemo://login-callback';
-const AUTH0_ISSUER = 'https://$AUTH0_DOMAIN';
-
 class _SplashScreenState extends State<SplashScreen> {
-  final FlutterAppAuth appAuth = FlutterAppAuth();
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-
   @override
   void initState() {
-    login();
     super.initState();
   }
 
-  login() async {
-    try {
-      final AuthorizationTokenResponse? result =
-          await appAuth.authorizeAndExchangeCode(
-        AuthorizationTokenRequest(
-          AUTH0_CLIENT_ID,
-          AUTH0_REDIRECT_URI,
-          issuer: 'https://$AUTH0_DOMAIN',
-          scopes: ['openid', 'profile', 'offline_access'],
-          // promptValues: ['login']
-        ),
-      );
-      final idToken = parseIdToken(result!.idToken!);
-      final profile = await getUserDetails(result.accessToken!);
-
-      await secureStorage.write(
-          key: 'refresh_token', value: result.refreshToken);
-
-      print(idToken);
-      print(profile);
-      setState(() {
-        //isBusy = false;
-        //isLoggedIn = true;
-        //name = idToken['name'];
-        //picture = profile['picture'];
-      });
-    } catch (e, s) {
-      print('login error: $e - stack: $s');
-    }
+  linkToDiscord() {
+    _launchURL("https://discord.gg/ZB4sv28fbh");
   }
 
-  Map<String, dynamic> parseIdToken(String idToken) {
-    final parts = idToken.split(r'.');
-    assert(parts.length == 3);
-
-    return jsonDecode(
-        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+  linkToGithub() {
+    _launchURL("https://github.com/hotg-ai");
   }
 
-  Future<Map<String, dynamic>> getUserDetails(String accessToken) async {
-    final url = Uri.parse('https://$AUTH0_DOMAIN/userinfo');
-    final response = await http.get(
-      url,
-      headers: {'Authorization': 'Bearer $accessToken'},
-    );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to get user details');
-    }
-  }
+  void _launchURL(String url) async => await canLaunch(url)
+      ? await launch(url, forceSafariVC: false)
+      : throw 'Could not launch $url';
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +50,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         "assets/images/icons/discord.png",
                         width: 28,
                       ),
-                      onPressed: () {}),
+                      onPressed: () {
+                        linkToDiscord();
+                      }),
                   Container(
                     width: 10,
                   ),
@@ -118,7 +61,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         "assets/images/icons/github.png",
                         width: 28,
                       ),
-                      onPressed: () {}),
+                      onPressed: () {
+                        linkToGithub();
+                      }),
                 ],
               ),
               body: ListView(
@@ -213,7 +158,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         "assets/images/icons/discord.png",
                         width: 28,
                       ),
-                      onPressed: () {}),
+                      onPressed: () {
+                        linkToDiscord();
+                      }),
                   Container(
                     width: 10,
                   ),
@@ -222,7 +169,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         "assets/images/icons/github.png",
                         width: 28,
                       ),
-                      onPressed: () {}),
+                      onPressed: () {
+                        linkToGithub();
+                      }),
                 ],
               ),
               body: ListView(
@@ -322,7 +271,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         "assets/images/icons/discord.png",
                         width: 28,
                       ),
-                      onPressed: () {}),
+                      onPressed: () {
+                        linkToDiscord();
+                      }),
                   Container(
                     width: 10,
                   ),
@@ -331,7 +282,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         "assets/images/icons/github.png",
                         width: 28,
                       ),
-                      onPressed: () {}),
+                      onPressed: () {
+                        linkToGithub();
+                      }),
                 ],
               ),
               body: ListView(

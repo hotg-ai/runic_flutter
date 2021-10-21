@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:runevm_fl/runevm_fl.dart';
+import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 
@@ -20,6 +21,7 @@ class RuneEngine {
   static load() async {
     RuneEngine.executionTime = 0.0;
     RuneEngine.output = {"type": "none", "output": "-"};
+    print("RunevmFl.load ${RuneEngine.runeBytes.length}");
     //Rune
     await RunevmFl.load(RuneEngine.runeBytes);
     manifest = await RunevmFl.manifest;
@@ -30,6 +32,7 @@ class RuneEngine {
       imageCap.parameters = _cap;
       capabilities.add(imageCap);
     }
+    HFAuth.addToHistory("${runeMeta["name"]} deployed");
   }
 
   static Future<Map<String, dynamic>> run() async {
@@ -45,6 +48,8 @@ class RuneEngine {
     dynamic runeOutput = await RunevmFl.runRune(bytes.toBytes(), lengths);
     int time = DateTime.now().microsecondsSinceEpoch - start;
     executionTime = time * 0.001;
+    HFAuth.addToHistory(
+        "${runeMeta["name"]} executed in ${executionTime.round()} ms");
     RuneEngine.output = {
       "type": "String",
       "output": "no valid output type detected"

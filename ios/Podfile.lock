@@ -26,6 +26,8 @@ PODS:
     - Flutter
   - url_launcher (0.0.1):
     - Flutter
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - ai_barcode (from `.symlinks/plugins/ai_barcode/ios`)
@@ -38,6 +40,7 @@ DEPENDENCIES:
   - runevm_fl (from `.symlinks/plugins/runevm_fl/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 SPEC REPOS:
   trunk:
@@ -65,11 +68,13 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
   ai_barcode: 67fb0a7b732dbb87e92b59bb90a438db9383fa2f
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
-  camera: b9eb73c055259c6f808a9da4a0d43780f6645281
+  camera: fe33292aff715a981eb34d7ce7b35b54337ff34c
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_appauth: 05c3778a1e4ae23364dd2ef37cbae14b244f646b
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
@@ -79,6 +84,7 @@ SPEC CHECKSUMS:
   runevm_fl: c71862cca794d7742220fcae7383c6fd365b16d7
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   url_launcher: b6e016d912f04be9f5bf6e8e82dc599b7ba59649
+  webview_flutter_wkwebview: 44aa025fbcf6730d808f1e0d86a5af5ac25fa8de
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
