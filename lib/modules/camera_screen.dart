@@ -30,6 +30,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
+  CameraImage? currentImage;
   CameraController? controller;
   List<CameraDescription> cameras = [];
   bool enableAudio = false;
@@ -99,13 +100,23 @@ class _CameraScreenState extends State<CameraScreen>
                   )),
         );
       }
-      return CameraPreview(
-        controller!,
-        child: RuneEngine.output["type"] == "Objects"
-            ? CustomPaint(
-                painter: ShapePainter(RuneEngine.objects), child: Container())
-            : Container(),
-      );
+
+      final size = MediaQuery.of(context).size;
+      final deviceRatio = size.width / size.height;
+      print(controller!.value.aspectRatio);
+      return Transform.scale(
+          scale: 0.7 / deviceRatio,
+          child: Center(
+              child: AspectRatio(
+                  aspectRatio: 1 / controller!.value.aspectRatio,
+                  child: CameraPreview(
+                    controller!,
+                    child: RuneEngine.output["type"] == "Objects"
+                        ? CustomPaint(
+                            painter: ShapePainter(RuneEngine.objects),
+                            child: Container())
+                        : Container(),
+                  ))));
     }
   }
 
@@ -185,7 +196,9 @@ class _CameraScreenState extends State<CameraScreen>
     } on CameraException catch (e) {
       _showCameraException(e);
     }
-
+    controller?.startImageStream((CameraImage image) {
+      currentImage = image;
+    });
     if (mounted) {
       setState(() {});
     }
@@ -236,14 +249,22 @@ class _CameraScreenState extends State<CameraScreen>
 
   run() async {
     loading = true;
-    setState(() {});
-    XFile shot = await controller!.takePicture();
-    Uint8List rawImage = await shot.readAsBytes();
-    List<Uint8List> data =
-        ImageUtils.convertImage(rawImage, widget.cap.parameters);
-    widget.cap.thumb = data[1];
-    Uint8List bytes = data[0];
-    widget.cap.raw = bytes;
+
+    if (kIsWeb) {
+      setState(() {});
+      XFile shot = await controller!.takePicture();
+      Uint8List rawImage = await shot.readAsBytes();
+      List<Uint8List> data =
+          ImageUtils.convertImage(rawImage, widget.cap.parameters);
+      widget.cap.thumb = data[1];
+      widget.cap.raw = data[0];
+    } else {
+      List<Uint8List> data =
+          ImageUtils.processCameraImage(currentImage!, widget.cap.parameters);
+      widget.cap.thumb = data[1];
+      Uint8List bytes = data[0];
+      widget.cap.raw = bytes;
+    }
 
     await RuneEngine.run();
     loading = false;

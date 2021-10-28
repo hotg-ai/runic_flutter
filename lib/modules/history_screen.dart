@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:runic_flutter/config/theme.dart';
+import 'package:runic_flutter/core/analytics.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
@@ -21,12 +22,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   List<String> dateStamps = [];
   void refreshHistory() async {
-    await HFAuth.getHistory();
-    dateStamps = List.from(HFAuth.history.keys);
+    await Analytics.getHistory();
+    dateStamps = List.from(Analytics.history.keys);
     dateStamps.sort((a, b) {
       return int.parse(a) > int.parse(b) ? -1 : 1;
     });
-    print("datestamps $dateStamps");
     setState(() {});
   }
 
@@ -111,7 +111,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   padding: EdgeInsets.fromLTRB(
                                                       21, 24, 0, 0),
                                                   child: Text(
-                                                    "${HFAuth.history[dateStamps[index]]}",
+                                                    "${Analytics.history[dateStamps[index]]}",
                                                     style: TextStyle(
                                                         fontSize: 12,
                                                         fontWeight:

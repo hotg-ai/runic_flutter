@@ -16,8 +16,9 @@ class HFAuth {
   static Map<String, dynamic> idToken = {};
   static Map<String, dynamic> profile = {};
   static bool isLoggedIn = false;
+  static bool asked = false;
   static init() async {
-    if (isLoggedIn) return;
+    print(">>>>>>initLogin");
     String data = await rootBundle.loadString("assets/auth.json");
     final Map<String, dynamic> auth = jsonDecode(data);
     auth0Domain = auth["AUTH0_DOMAIN"];
@@ -28,7 +29,12 @@ class HFAuth {
     auth0Issuer = 'https://$auth0Domain';
     final storedRefreshToken = await secureStorage.read(key: 'refresh_token');
     if (storedRefreshToken == null) {
+      print("storedRefreshToken null");
       isLoggedIn = false;
+      return;
+    }
+    if (asked) {
+      print("asked $asked");
       return;
     }
     try {
@@ -41,26 +47,36 @@ class HFAuth {
       idToken = parseIdToken(response!.idToken!);
       profile = await getUserDetails(response.accessToken!);
 
-      secureStorage.write(key: 'refresh_token', value: response.refreshToken);
+      await secureStorage.write(
+          key: 'refresh_token', value: response.refreshToken);
       isLoggedIn = true;
+      print("isLoggedIn $isLoggedIn");
     } catch (e, s) {
       print('error on refresh token: $e - stack: $s');
       await logout();
     }
+    asked = true;
   }
 
   static Future<bool> checkLogin() async {
     final storedRefreshToken = await secureStorage.read(key: 'refresh_token');
-    isLoggedIn = storedRefreshToken == null;
+    print("storedRefreshToken $storedRefreshToken");
+    isLoggedIn = storedRefreshToken != null;
     return isLoggedIn;
   }
 
   static logout() async {
     await secureStorage.delete(key: 'refresh_token');
     isLoggedIn = false;
+    asked = true;
   }
 
   static login() async {
+    print(">>>>>>login");
+    if (asked) {
+      print("asked $asked");
+      return;
+    }
     try {
       final AuthorizationTokenResponse? result =
           await appAuth.authorizeAndExchangeCode(
@@ -79,6 +95,7 @@ class HFAuth {
       isLoggedIn = false;
       print('login error: $e - stack: $s');
     }
+    asked = true;
   }
 
   static Map<String, dynamic> parseIdToken(String idToken) {
@@ -87,29 +104,6 @@ class HFAuth {
 
     return jsonDecode(
         utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
-  }
-
-  static Map<String, dynamic> history = {};
-  static Future<Map<String, dynamic>> getHistory() async {
-    print("getting history");
-    String? out = await secureStorage.read(key: 'history');
-    print(out);
-    if (out != null) {
-      history = jsonDecode(out);
-      return history;
-    }
-
-    return history;
-  }
-
-  static addToHistory(String event) async {
-    if (history.keys.length == 0) {
-      await getHistory();
-    }
-    history["${DateTime.now().millisecondsSinceEpoch}"] = event;
-    print("adding to history");
-    await secureStorage.write(key: 'history', value: jsonEncode(history));
-    print("success!");
   }
 
   static Future<Map<String, dynamic>> getUserDetails(String accessToken) async {

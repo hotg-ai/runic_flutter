@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:runic_flutter/config/theme.dart';
-import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
 import 'package:webviewx/webviewx.dart';
@@ -16,19 +15,7 @@ class PostsScreen extends StatefulWidget {
 class _PostsScreenState extends State<PostsScreen> {
   @override
   void initState() {
-    refreshHistory();
     super.initState();
-  }
-
-  List<String> dateStamps = [];
-  void refreshHistory() async {
-    await HFAuth.getHistory();
-    dateStamps = List.from(HFAuth.history.keys);
-    dateStamps.sort((a, b) {
-      return int.parse(a) > int.parse(b) ? -1 : 1;
-    });
-    print("datestamps $dateStamps");
-    setState(() {});
   }
 
   @override

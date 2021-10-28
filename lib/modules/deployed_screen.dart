@@ -1,17 +1,13 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:glassmorphism/glassmorphism.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:runic_flutter/config/theme.dart';
-import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/core/registry.dart';
+import 'package:runic_flutter/core/rune_depot.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
-import 'package:runic_flutter/modules/rune_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
-import 'package:runic_flutter/utils/navigation_bar_clipper.dart';
 import 'package:runic_flutter/widgets/background.dart';
-import 'package:blur/blur.dart';
+
 import 'package:runic_flutter/widgets/barcode_scanner.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
 
@@ -27,13 +23,14 @@ class _DeployedScreenState extends State<DeployedScreen> {
   @override
   void initState() {
     super.initState();
-    fetchRegistry();
+    fetchRunes();
   }
 
-  void fetchRegistry() async {
-    await Registry.fetchRegistry();
+  Future<void> fetchRunes() async {
+    await RuneDepot.getRunes();
+    print("fetch Runes");
     setState(() {
-      searchList = Registry.runes;
+      search();
     });
   }
 
@@ -42,7 +39,7 @@ class _DeployedScreenState extends State<DeployedScreen> {
   TextEditingController urlTextController =
       new TextEditingController(text: "https://");
   void search() {
-    searchList = Registry.runes
+    searchList = RuneDepot.runes!
         .where((element) =>
             "$element".toLowerCase().contains(searchString.toLowerCase()))
         .toList();
@@ -209,6 +206,9 @@ class _DeployedScreenState extends State<DeployedScreen> {
                         "name": "/${urlTextController.text}".split("/").last,
                         "description": "Fetched Rune"
                       };
+                      RuneDepot.addRune(
+                          RuneEngine.runeBytes, RuneEngine.runeMeta);
+                      await fetchRunes();
                       setState(() {
                         loading = false;
                       });
@@ -224,7 +224,7 @@ class _DeployedScreenState extends State<DeployedScreen> {
                 ),
                 Container(
                   child: Text(
-                    'Yunes deployed in the app by you',
+                    'Your Runes',
                     style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,
@@ -298,94 +298,145 @@ class _DeployedScreenState extends State<DeployedScreen> {
                 Container(
                     padding: EdgeInsets.all(0),
                     //height: 2000,
-                    child: GridView.builder(
+                    child: ListView.builder(
                       shrinkWrap: true,
                       primary: false,
                       itemCount: searchList.length,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 320,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8),
                       itemBuilder: (BuildContext context, int index) {
                         if (index >= searchList.length) {
                           return Container();
                         }
-                        return new InkWell(
-                            onTap: () async {
-                              setState(() {
-                                loading = true;
-                              });
+                        return Container(
+                            height: 120,
+                            padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            width: double.infinity,
+                            child: new InkWell(
+                                onTap: () async {
+                                  setState(() {
+                                    loading = true;
+                                  });
 
-                              RuneEngine.runeBytes = await Registry.downloadWASM(
-                                  'https://rune-registry.web.app/registry/' +
-                                      searchList[index]["name"] +
-                                      '/rune.rune');
-                              print('https://rune-registry.web.app/registry/' +
-                                  searchList[index]["name"] +
-                                  '/rune.rune');
-                              RuneEngine.runeMeta = searchList[index];
-                              setState(() {
-                                loading = false;
-                              });
-                              Navigator.pushNamed(
-                                context,
-                                'rune',
-                              );
-                            },
-                            child: new Card(
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(color: blackColor, width: 2),
-                                  borderRadius: BorderRadius.circular(19.0),
-                                ),
-                                color: blackColor.withAlpha(0),
-                                margin: EdgeInsets.all(0),
-                                shadowColor: blackColor,
-                                child: Container(
-                                  padding: EdgeInsets.all(6),
-                                  child: new GridTile(
-                                      child: Container(
-                                          child: Opacity(
-                                              opacity: 0.8,
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
-                                                child: (searchList[index]
-                                                        .containsKey("img"))
-                                                    ? Image.network(
-                                                        searchList[index]["img"]
-                                                            ["src"],
-                                                        fit: BoxFit.cover,
-                                                        height: double.infinity,
-                                                        width: double.infinity,
-                                                      )
-                                                    : Image.asset(
-                                                        "assets/images/rune_placeholder.png",
-                                                        fit: BoxFit.cover,
-                                                        height: double.infinity,
-                                                        width: double.infinity,
+                                  RuneEngine.runeBytes =
+                                      (await RuneDepot.getRune(
+                                          searchList[index]["uuid"]))!;
+                                  RuneEngine.runeMeta = searchList[index];
+
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  Navigator.pushNamed(
+                                    context,
+                                    'rune',
+                                  );
+                                },
+                                child: new Card(
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: Colors.white.withAlpha(20),
+                                          width: 0),
+                                      borderRadius: BorderRadius.circular(19.0),
+                                    ),
+                                    color: Colors.white.withAlpha(20),
+                                    margin: EdgeInsets.all(0),
+                                    shadowColor: blackColor,
+                                    child: Container(
+                                      padding: EdgeInsets.all(0),
+                                      child: new GridTile(
+                                        child: Container(
+                                            child: Opacity(
+                                                opacity: 0.8,
+                                                child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                    child: Row(children: [
+                                                      Expanded(
+                                                        child: (searchList[
+                                                                    index]
+                                                                .containsKey(
+                                                                    "img"))
+                                                            ? Image.network(
+                                                                searchList[index]
+                                                                        ["img"]
+                                                                    ["src"],
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                height: double
+                                                                    .infinity,
+                                                                width: double
+                                                                    .infinity,
+                                                              )
+                                                            : Image.asset(
+                                                                "assets/images/rune_placeholder.png",
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                height: double
+                                                                    .infinity,
+                                                                width: double
+                                                                    .infinity,
+                                                              ),
                                                       ),
-                                              ))),
-                                      header: Container(
-                                          padding: EdgeInsets.all(12.0),
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  alignment:
-                                                      Alignment.centerLeft,
-                                                  child: new Text(
-                                                    searchList[index]['name'],
-                                                    textAlign: TextAlign.left,
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                                  ), //just for testing, will fill with image later
-                                                )
-                                              ]))),
-                                )));
+                                                      Expanded(
+                                                          child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(
+                                                                          12.0),
+                                                              child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Expanded(
+                                                                        child:
+                                                                            Container()),
+                                                                    Container(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      child:
+                                                                          new Text(
+                                                                        searchList[index]
+                                                                            [
+                                                                            'name'],
+                                                                        textAlign:
+                                                                            TextAlign.left,
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                16,
+                                                                            fontWeight:
+                                                                                FontWeight.w600),
+                                                                      ), //just for testing, will fill with image later
+                                                                    ),
+                                                                    Container(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      child:
+                                                                          new Text(
+                                                                        searchList[index]
+                                                                            [
+                                                                            'timestamp'],
+                                                                        textAlign:
+                                                                            TextAlign.left,
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                12,
+                                                                            fontWeight:
+                                                                                FontWeight.w200),
+                                                                      ), //just for testing, will fill with image later
+                                                                    ),
+                                                                    Expanded(
+                                                                        child:
+                                                                            Container())
+                                                                  ])))
+                                                    ])))),
+                                      ),
+                                    ))));
                       },
                     )),
                 Container(height: 80)

@@ -4,24 +4,31 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
+import 'package:runic_flutter/core/rune_depot.dart';
+
 class Registry {
   static List<dynamic> runes = [];
+  static Function onUpdate = (int bytesIn, int totalBytes) {
+    print("Received $bytesIn/$totalBytes");
+  };
   static Future<Uint8List> downloadWASM(String urlString) async {
     final url = Uri.parse(urlString);
     final client = http.Client();
     final request = http.Request('GET', url);
+
     final response = await client.send(request);
     final stream = response.stream;
     List<int> runeBytes = [];
     await for (var data in stream) {
       runeBytes.addAll(data);
+      onUpdate(runeBytes.length, response.contentLength);
     }
     client.close();
     return new Uint8List.fromList(runeBytes);
   }
 
-  static Future<void> fetchRegistry() async {
-    if (runes.length == 0) {
+  static Future<void> fetchRegistry({bool? force: false}) async {
+    if (runes.length == 0 || force == true) {
       final url =
           Uri.parse("https://rune-registry.web.app/registry/runes.json");
       final response = await http.get(url);
@@ -31,7 +38,8 @@ class Registry {
         runes = List<dynamic>.from(jsonDecode(response.body));
         //filter on runes with web compatibility
         runes = runes.where((element) => element["web"] == true).toList();
-        //print(runes);
+        print("Loading runes");
+        await RuneDepot.checkCache(runes);
       } else {
         // If the server did not return a 200 OK response,
         // then throw an exception.

@@ -6,6 +6,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/core/registry.dart';
+import 'package:runic_flutter/core/rune_depot.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/rune_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
@@ -23,7 +24,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> searchList = [];
-  bool loading = false;
+  bool _loading = false;
+
+  String _loadingProgress = "";
+  String _loadingDescription = "";
   @override
   void initState() {
     super.initState();
@@ -119,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shrinkWrap: true,
               //crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
+                /*Container(
                   height: 38,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -232,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Container(
                   height: 30,
-                ),
+                ),*/
                 Container(
                   child: Text(
                     'Checkout our Runes',
@@ -330,22 +334,47 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (index >= searchList.length) {
                           return Container();
                         }
+
                         return new InkWell(
                             onTap: () async {
                               setState(() {
-                                loading = true;
+                                _loading = true;
                               });
+                              if (searchList[index]["cached"]) {
+                                RuneEngine.runeBytes = (await RuneDepot.getRune(
+                                    "${searchList[index]["name"]}_${searchList[index]["version"]}"))!;
+                                RuneEngine.runeMeta = searchList[index];
+                              } else {
+                                Registry.onUpdate =
+                                    (int bytesIn, int totalBytes) {
+                                  _loadingProgress =
+                                      "${bytesIn > totalBytes ? 100 : (bytesIn / totalBytes * 100).round()}%";
+                                  _loadingDescription =
+                                      "Fetching ${searchList[index]["name"]}";
+                                  print("Received $bytesIn/$totalBytes");
+                                  setState(() {});
+                                };
+                                RuneEngine.runeBytes = await Registry.downloadWASM(
+                                    'https://rune-registry.web.app/registry/' +
+                                        searchList[index]["name"] +
+                                        '/rune.rune');
+                                Registry.onUpdate =
+                                    (int bytesIn, int totalBytes) {
+                                  print("Received $bytesIn/$totalBytes");
+                                };
+                                _loadingProgress = "";
+                                _loadingDescription = "";
+                                RuneEngine.runeMeta = searchList[index];
+                                await RuneDepot.addRune(
+                                    RuneEngine.runeBytes, RuneEngine.runeMeta,
+                                    uuid:
+                                        "${searchList[index]["name"]}_${searchList[index]["version"]}");
+                                await Registry.fetchRegistry(force: true);
+                                search();
+                              }
 
-                              RuneEngine.runeBytes = await Registry.downloadWASM(
-                                  'https://rune-registry.web.app/registry/' +
-                                      searchList[index]["name"] +
-                                      '/rune.rune');
-                              print('https://rune-registry.web.app/registry/' +
-                                  searchList[index]["name"] +
-                                  '/rune.rune');
-                              RuneEngine.runeMeta = searchList[index];
                               setState(() {
-                                loading = false;
+                                _loading = false;
                               });
                               Navigator.pushNamed(
                                 context,
@@ -363,6 +392,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Container(
                                   padding: EdgeInsets.all(6),
                                   child: new GridTile(
+                                      footer: Container(
+                                          padding: EdgeInsets.only(bottom: 5),
+                                          child: Row(children: [
+                                            Expanded(child: Container()),
+                                            searchList[index]["cached"]
+                                                ? Icon(
+                                                    Icons.cached,
+                                                    color: Colors.white
+                                                        .withAlpha(100),
+                                                    size: 12,
+                                                  )
+                                                : Container(),
+                                            Container(
+                                              width: 10,
+                                            )
+                                          ])),
                                       child: Container(
                                           child: Opacity(
                                               opacity: 0.8,
@@ -413,7 +458,12 @@ class _HomeScreenState extends State<HomeScreen> {
             )),
       ),
       MainMenu(),
-      loading ? LoadingScreen() : Container(),
+      _loading
+          ? LoadingScreen(
+              progress: _loadingProgress,
+              description: _loadingDescription,
+            )
+          : Container(),
     ]);
   }
 }
