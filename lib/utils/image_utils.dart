@@ -3,7 +3,16 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 import 'package:image/image.dart' as ImageLib;
+
+const List<Color> colors = [
+  Colors.red,
+  Colors.green,
+  Colors.cyan,
+  Colors.yellow,
+  Colors.purple,
+];
 
 class ImageUtils {
   static List<Uint8List> processCameraImage(
@@ -124,6 +133,26 @@ class ImageUtils {
     }
 
     return [new Uint8List.fromList(input), new Uint8List.fromList(thumb)];
+  }
+
+  static Uint8List objectImage(List bytes, List objects) {
+    int size = sqrt(bytes.length).round();
+    Map dims = {};
+    final outImage = ImageLib.Image(size, size);
+    for (int pos = 0; pos < bytes.length; pos++) {
+      Color color = (bytes[pos] == 0)
+          ? Colors.transparent
+          : colors[bytes[pos] % (colors.length)];
+      dims[bytes[pos]] = 2;
+      outImage.data[pos] = Uint32List.view(new Uint8List.fromList(
+              [color.red, color.green, color.blue, color.alpha == 0 ? 0 : 100])
+          .buffer)[0];
+    }
+    print(dims);
+    for (int key in dims.keys) {
+      print("$key ${key % colors.length}");
+    }
+    return Uint8List.fromList(ImageLib.encodePng(outImage));
   }
 
   static Uint8List bytesRGBtoPNG(List bytes) {

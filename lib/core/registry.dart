@@ -12,7 +12,7 @@ class Registry {
     print("Received $bytesIn/$totalBytes");
   };
   static Future<Uint8List> downloadWASM(String urlString) async {
-    final url = Uri.parse(urlString);
+    final url = Uri.parse(urlString.trim());
     final client = http.Client();
     final request = http.Request('GET', url);
 

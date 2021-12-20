@@ -1,17 +1,13 @@
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:runic_flutter/config/theme.dart';
-import 'package:runic_flutter/modules/camera_screen.dart';
-import 'package:runic_flutter/utils/image_utils.dart';
-import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
 
 class RawCapabilityWidget extends StatelessWidget {
   final Function() notifyParent;
   final RawCap cap;
   final single;
+  final TextEditingController controller = new TextEditingController();
 
   RawCapabilityWidget(
       {Key? key,
@@ -19,8 +15,6 @@ class RawCapabilityWidget extends StatelessWidget {
       required this.notifyParent,
       this.single = true})
       : super(key: key);
-
-  TextEditingController controller = new TextEditingController();
 
   String utf8toString(Uint8List raw) {
     return utf8.decode(raw);

@@ -9,7 +9,9 @@ import 'package:runic_flutter/core/analytics.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/rand_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/accel_cap.dart';
 
 class RuneEngine {
   static double executionTime = 0.0;
@@ -20,7 +22,14 @@ class RuneEngine {
   static List<dynamic> manifest = [];
   static List<RawCap> capabilities = [];
   static List<dynamic> objects = [];
+  static List<dynamic> logs = [];
   static String? url;
+
+  static Future<List<dynamic>> getLogs() async {
+    dynamic logs = await RunevmFl.getLogs();
+    return logs;
+  }
+
   static load() async {
     RuneEngine.executionTime = 0.0;
     RuneEngine.output = {"type": "none", "output": "-"};
@@ -30,7 +39,9 @@ class RuneEngine {
     manifest = await RunevmFl.manifest;
     capabilities = [];
     print(manifest);
+
     for (dynamic cap in manifest) {
+      print(cap);
       if (cap["type"] == "ImageCapability") {
         ImageCap imageCap = new ImageCap();
         imageCap.parameters = cap;
@@ -39,6 +50,15 @@ class RuneEngine {
         RawCap rawCap = new RawCap();
         rawCap.parameters = cap;
         capabilities.add(rawCap);
+      } else if (cap["type"] == "RandCapability") {
+        RandCap randCap = new RandCap();
+        randCap.parameters = cap;
+        capabilities.add(randCap);
+      } else if (cap["type"] == "AccelCapability") {
+        AccelCap accelCap = new AccelCap(
+            cap.containsKey("sample_count") ? cap["sample_count"] : 1000);
+        accelCap.parameters = cap;
+        capabilities.add(accelCap);
       }
     }
     Analytics.addToHistory("${runeMeta["name"]} deployed");
@@ -54,6 +74,7 @@ class RuneEngine {
         print("Bytes added ${cap.raw!.length}");
         bytes.add(cap.raw!);
       }
+
       print("Bytes total ${bytes.length}");
       int start = DateTime.now().microsecondsSinceEpoch;
       dynamic runeOutput = await RunevmFl.runRune(bytes.toBytes(), lengths);
@@ -147,20 +168,37 @@ class RuneEngine {
         'hair drier',
         'toothbrush'
       ];
-      print(runeOutput);
 
       if (runeOutput is String) {
-        RuneEngine.output = {"type": "String", "output": "$runeOutput"};
+        RuneEngine.output = {
+          "type": "String",
+          "output":
+              "${runeOutput.length > 1000 ? runeOutput.substring(0, 1000) : runeOutput}"
+        };
         if (RuneEngine.output["type"] == "String") {
           dynamic out = {};
           if (RuneEngine.output["output"] == "error") {
             out = {"elements": []};
           } else {
-            out = json.decode(RuneEngine.output["output"]);
+            out = json.decode(runeOutput);
           }
-
-          if (out.containsKey("elements")) {
+          if (out is List) {
+            print(out[0]["type"]);
+            if (out.length == 2) {
+              if (out[0].containsKey("elements") &&
+                  out[1].containsKey("elements") &&
+                  out[0]["type_name"] == "utf8") {
+                RuneEngine.output["type"] = "Image";
+                RuneEngine.output["output"] = ImageUtils.objectImage(
+                    out[1]["elements"], out[0]["elements"]);
+                RuneEngine.output["elements"] = out[0]["elements"];
+                return RuneEngine.output;
+                //image rec
+              }
+            }
+          } else if (out.containsKey("elements")) {
             List<dynamic> outList = out["elements"];
+            print("${out["elements"].length}");
             if (runeMeta["name"] == "hotg-ai/yolo_v5") {
               print("out[elements].length ${out["elements"].length}");
               RuneEngine.objects = [];
@@ -177,7 +215,7 @@ class RuneEngine {
               }
               RuneEngine.output["type"] = "Objects";
               RuneEngine.output["output"] = objects;
-            } else if (out["elements"].length > 100) {
+            } else if (out["elements"].length > 5000) {
               RuneEngine.output["type"] = "Image";
               RuneEngine.output["output"] =
                   ImageUtils.bytesRGBtoPNG(out["elements"]);
@@ -188,6 +226,7 @@ class RuneEngine {
           }
         }
       } else if (runeOutput is List) {
+        print("Its a list!");
         if (runeMeta["name"] == "hotg-ai/yolo_v5") {
           RuneEngine.objects = [];
           for (int i = 0; i < runeOutput.length; i += 6) {

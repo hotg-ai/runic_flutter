@@ -27,11 +27,12 @@ dependencies:
   glassmorphism: ^2.0.1
   cupertino_icons: ^1.0.2
   http: ^0.13.3
-  camera: ^0.9.4+2
+  camera: ^0.9.4+3
   share_plus: ^3.0.2
   image: ^3.0.5
   loading_indicator: ^3.0.2
-  image_picker: ^0.8.4+2
+  image_picker: ^0.8.4+4
+  sensors_plus: ^1.2.1
   ai_barcode: ^3.0.1
   path_provider: ^2.0.5
   flutter_secure_storage: ^4.2.1
@@ -39,6 +40,7 @@ dependencies:
   url_launcher: ^6.0.12
   webviewx: ^0.2.1
   page_transition: ^2.0.4 
+  fl_chart: ^0.40.2
   uuid: ^3.0.5
   hive: ^2.0.4
   runevm_fl:

@@ -74,7 +74,7 @@ class _ResultScreenState extends State<ResultScreen> {
           body: Container(
               padding: EdgeInsets.fromLTRB(24, 0, 24, 80),
               child: ListView.builder(
-                  itemCount: 2,
+                  itemCount: 3,
                   itemBuilder: (context, index) {
                     if (index == 0 &&
                         RuneEngine.capabilities[0].type ==
@@ -139,6 +139,17 @@ class _ResultScreenState extends State<ResultScreen> {
                                         padding:
                                             EdgeInsets.fromLTRB(0, 0, 0, 0),
                                         child: Stack(children: [
+                                          RuneEngine.output
+                                                  .containsKey("elements")
+                                              ? Image.memory(
+                                                  (RuneEngine.capabilities[0]
+                                                          as ImageCap)
+                                                      .thumb!,
+                                                  fit: BoxFit.cover,
+                                                  width: double.infinity,
+                                                  height: double.infinity,
+                                                )
+                                              : Container(),
                                           RuneEngine.output["type"] == "Objects"
                                               ? Center(
                                                   child: Container(
@@ -199,6 +210,17 @@ class _ResultScreenState extends State<ResultScreen> {
                               ));
                     }
                     if (index == 1) {
+                      return RuneEngine.output.containsKey("elements")
+                          ? Container(
+                              padding: EdgeInsets.all(12),
+                              child: Center(
+                                  child: Text(
+                                "${RuneEngine.output["elements"]}",
+                                style: TextStyle(color: Colors.white),
+                              )))
+                          : Container();
+                    }
+                    if (index == 2) {
                       return Row(mainAxisSize: MainAxisSize.max, children: [
                         Expanded(
                             child: Container(
