@@ -7,6 +7,7 @@
 
 import 'package:ai_barcode_web/ai_barcode_web.dart';
 import 'package:camera_web/camera_web.dart';
+import 'package:device_info_plus_web/device_info_plus_web.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:runevm_fl/runevm_fl_web.dart';
 import 'package:sensors_plus_web/sensors_plus_web.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 void registerPlugins(Registrar registrar) {
   AiBarcodeWebPlugin.registerWith(registrar);
   CameraPlugin.registerWith(registrar);
+  DeviceInfoPlusPlugin.registerWith(registrar);
   ImagePickerPlugin.registerWith(registrar);
   RunevmFlWeb.registerWith(registrar);
   SensorsPlugin.registerWith(registrar);

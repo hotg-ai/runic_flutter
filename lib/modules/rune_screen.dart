@@ -282,45 +282,7 @@ class _RuneScreenState extends State<RuneScreen> {
 
                       }
                       if (index == RuneEngine.manifest.length + 2) {
-                        return Container(
-                          height: 42,
-                          margin: EdgeInsets.only(top: 11, bottom: 11),
-                          decoration: new BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 0,
-                                  blurRadius: 6,
-                                  offset: Offset(
-                                      0, 3), // changes position of shadow
-                                ),
-                              ],
-                              borderRadius: BorderRadius.circular(20.5),
-                              gradient: LinearGradient(
-                                begin: Alignment.centerRight,
-                                end: Alignment.centerLeft,
-                                colors: [
-                                  charcoalGrey.withAlpha(125),
-                                  barneyPurpleColor.withAlpha(50),
-                                  indigoBlueColor.withAlpha(125),
-                                ],
-                              )),
-                          child: RawMaterialButton(
-                            elevation: 4.0,
-                            child: new Text(
-                              'Show Rune runtime logs',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LogScreen()),
-                              );
-                            },
-                          ),
-                        );
+                        return runTimeLogs();
                       }
                       return Container();
                     })),
@@ -336,5 +298,44 @@ class _RuneScreenState extends State<RuneScreen> {
               })
           : Container()
     ]);
+  }
+
+  Widget runTimeLogs() {
+    return Container(
+      height: 42,
+      margin: EdgeInsets.only(top: 11, bottom: 11),
+      decoration: new BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 6,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+          borderRadius: BorderRadius.circular(20.5),
+          gradient: LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: [
+              charcoalGrey.withAlpha(125),
+              barneyPurpleColor.withAlpha(50),
+              indigoBlueColor.withAlpha(125),
+            ],
+          )),
+      child: RawMaterialButton(
+        elevation: 4.0,
+        child: new Text(
+          'Show Rune runtime logs',
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LogScreen()),
+          );
+        },
+      ),
+    );
   }
 }

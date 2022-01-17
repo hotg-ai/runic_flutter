@@ -1,8 +1,13 @@
 # This is a generated file; do not edit or check into version control.
 ai_barcode=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/ai_barcode-3.0.1/
 ai_barcode_web=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/ai_barcode_web-3.0.0/
-camera=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.9.4+3/
+camera=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.9.4+5/
 camera_web=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera_web-0.2.1+1/
+device_info_plus=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/device_info_plus-3.2.1/
+device_info_plus_linux=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/device_info_plus_linux-2.1.1/
+device_info_plus_macos=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/device_info_plus_macos-2.2.1/
+device_info_plus_web=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/device_info_plus_web-2.1.0/
+device_info_plus_windows=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/device_info_plus_windows-2.1.1/
 flutter_appauth=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_appauth-1.1.0+2/
 flutter_plugin_android_lifecycle=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.3/
 flutter_secure_storage=/Users/geerttrooskens/dev/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_secure_storage-4.2.1/

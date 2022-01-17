@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hive/hive.dart';
@@ -15,7 +14,6 @@ class RuneDepot {
   static Box? runeDB;
   static Box? dataDB;
   static List<Map<String, dynamic>>? runes = [];
-  static FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   static check() async {
     if (runeDB == null) {

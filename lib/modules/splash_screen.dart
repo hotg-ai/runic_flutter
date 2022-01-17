@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SplashScreen extends StatefulWidget {
   static int screen = 0;
+
   SplashScreen({Key? key}) : super(key: key);
 
   @override
@@ -12,9 +14,23 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+
   @override
   void initState() {
     super.initState();
+    checkFirstTime();
+  }
+
+  void checkFirstTime() async {
+    final firstTime = await secureStorage.read(key: 'is_first_time');
+    print("firsttime: $firstTime");
+    if (firstTime != null) {
+      if (firstTime == "false") {
+        SplashScreen.screen = 0;
+        Navigator.pushNamed(context, "home");
+      }
+    }
   }
 
   linkToDiscord() {
@@ -245,8 +261,10 @@ class _SplashScreenState extends State<SplashScreen> {
                               fontSize: 16,
                               fontWeight: FontWeight.w600),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           SplashScreen.screen = 0;
+                          await secureStorage.write(
+                              key: 'is_first_time', value: "false");
                           Navigator.pushNamed(context, "home");
                         }),
                   )),
