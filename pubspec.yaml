@@ -30,7 +30,9 @@ dependencies:
   camera: ^0.9.4+5
   share_plus: ^3.0.2
   image: ^3.0.5
-  socket_io_client: ^1.0.2
+  socket_io_client: ^2.0.0-beta.4-nullsafety.0
+  flutter_simple_dependency_injection: ^2.0.0
+  fingerprintjs: ^2.0.0
   loading_indicator: ^3.0.2
   image_picker: ^0.8.4+4
   sensors_plus: ^1.2.1
@@ -43,7 +45,8 @@ dependencies:
   page_transition: ^2.0.4 
   fl_chart: ^0.40.2
   uuid: ^3.0.5
-  device_info_plus: ^3.2.1
+  platform_device_id: ^1.0.1
+  web_browser_detect: ^2.0.2
   hive: ^2.0.4
   runevm_fl:
     # When depending on this package from a real application you should use:
