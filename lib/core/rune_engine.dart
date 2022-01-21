@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/core/analytics.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/rand_cap.dart';
@@ -61,6 +62,7 @@ class RuneEngine {
         capabilities.add(accelCap);
       }
     }
+    Logs.sendLogs();
     Analytics.addToHistory("${runeMeta["name"]} deployed");
   }
 
@@ -82,6 +84,7 @@ class RuneEngine {
       executionTime = time * 0.001;
       Analytics.addToHistory(
           "${runeMeta["name"]} executed in ${executionTime.round()} ms");
+      Logs.sendLogs();
       RuneEngine.output = {
         "type": "String",
         "output": "no valid output type detected"

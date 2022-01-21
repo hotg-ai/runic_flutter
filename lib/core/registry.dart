@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'dart:convert';
 
 import 'package:runic_flutter/core/rune_depot.dart';
@@ -12,6 +13,11 @@ class Registry {
     print("Received $bytesIn/$totalBytes");
   };
   static Future<Uint8List> downloadWASM(String urlString) async {
+    List<String> parts = urlString.split("#project_id=");
+    if (parts.length == 2) {
+      urlString = parts[0];
+      Logs.projectID = int.tryParse(parts[1]);
+    }
     final url = Uri.parse(urlString.trim());
     final client = http.Client();
     final request = http.Request('GET', url);

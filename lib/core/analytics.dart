@@ -21,7 +21,7 @@ class Analytics {
   }
 
   static addToHistory(String event) async {
-    Logs.sendToSocket(event);
+    Logs.sendToSocket(event, LogLevel.log);
     if (kIsWeb) return;
     if (history.keys.length == 0) {
       await getHistory();
