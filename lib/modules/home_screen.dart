@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -43,13 +44,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void login() async {
-    await HFAuth.init();
-    if (HFAuth.isLoggedIn) {
-      print("AUTH0logged in with ${HFAuth.profile}");
-    } else {
-      await HFAuth.login();
+    if (!kIsWeb) {
+      await HFAuth.init();
+      if (HFAuth.isLoggedIn) {
+        print("AUTH0logged in with ${HFAuth.profile}");
+      } else {
+        await HFAuth.login();
+      }
+      setState(() {});
     }
-    setState(() {});
   }
 
   String searchString = "";
@@ -123,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shrinkWrap: true,
               //crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                /*Container(
+                Container(
                   height: 38,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -215,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     onPressed: () async {
                       setState(() {
-                        loading = true;
+                        _loading = true;
                       });
 
                       RuneEngine.runeBytes =
@@ -225,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "description": "Fetched Rune"
                       };
                       setState(() {
-                        loading = false;
+                        _loading = false;
                       });
                       Navigator.pushNamed(
                         context,
@@ -236,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Container(
                   height: 30,
-                ),*/
+                ),
                 Container(
                   child: Text(
                     'Checkout our Runes',

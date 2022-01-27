@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:uuid/uuid.dart';
@@ -27,7 +26,12 @@ class Logs {
   static String? visitorID;
   static int? projectID = 0;
   static String? userName;
-  static init() async {
+  static init(int newProjectID) async {
+    if (projectID == newProjectID) {
+      return;
+    } else {
+      projectID = newProjectID;
+    }
     if (visitorID == null) {
       visitorID = await getVisitorID();
     }
@@ -63,7 +67,6 @@ class Logs {
         socket!.emit("register_device_$projectID", deviceInfo);
         print("Connected to server");
         print(deviceInfo);
-        Logs.socket!.emit('msg', ['mobile app', 'Connected']);
       });
 
       Logs.socket!.on('event', (data) => print(data));
@@ -86,6 +89,7 @@ class Logs {
   }
 
   static Future<String> getVisitorID() async {
+    print(">>>>>>>>>>>>>>");
     if (kIsWeb) {
       return "${Browser().hashCode}";
     }
@@ -93,12 +97,14 @@ class Logs {
   }
 
   static String getDeviceType() {
+    print(">>>>>>>>>>>>>>");
     return kIsWeb
         ? "${Browser().browserAgent}"
         : "${Platform.operatingSystem} ${Platform.operatingSystemVersion}";
   }
 
   static sendLogs() async {
+    print(">>>>>>>>>>>>>>");
     List<dynamic> logs = (await RuneEngine.getLogs()).toList();
     for (String log in logs) {
       List<String> fields = "$log".split("@@");

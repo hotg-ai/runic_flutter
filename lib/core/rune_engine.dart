@@ -9,6 +9,7 @@ import 'package:runic_flutter/core/analytics.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
+import 'package:runic_flutter/widgets/capabilities/audio_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/rand_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
@@ -60,6 +61,14 @@ class RuneEngine {
             cap.containsKey("sample_count") ? cap["sample_count"] : 1000);
         accelCap.parameters = cap;
         capabilities.add(accelCap);
+      } else if (cap["type"] == "AudioCapability") {
+        AudioCap audioCap = new AudioCap(
+            hz: cap.containsKey("hz") ? cap["hz"] : 16000,
+            ms: cap.containsKey("sample_duration_ms")
+                ? cap["sample_duration_ms"]
+                : 16000);
+        audioCap.parameters = cap;
+        capabilities.add(audioCap);
       }
     }
     Logs.sendLogs();
@@ -72,6 +81,7 @@ class RuneEngine {
       List<int> lengths = [];
       var bytes = BytesBuilder();
       for (RawCap cap in capabilities) {
+        cap.prepData();
         lengths.add(cap.raw!.length);
         print("Bytes added ${cap.raw!.length}");
         bytes.add(cap.raw!);
@@ -176,7 +186,7 @@ class RuneEngine {
         RuneEngine.output = {
           "type": "String",
           "output":
-              "${runeOutput.length > 1000 ? runeOutput.substring(0, 1000) : runeOutput}"
+              "${runeOutput.length > 10000 ? runeOutput.substring(0, 10000) : runeOutput}"
         };
         if (RuneEngine.output["type"] == "String") {
           dynamic out = {};

@@ -9,6 +9,8 @@ import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/capabilities/accel_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/accel_capability_widget.dart';
+import 'package:runic_flutter/widgets/capabilities/audio_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/audio_capability_widget.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/image_capability_widget.dart';
 import 'package:runic_flutter/widgets/capabilities/rand_cap.dart';
@@ -177,6 +179,16 @@ class _RuneScreenState extends State<RuneScreen> {
                               padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                               child: AccelCapabilityWidget(
                                 cap: RuneEngine.capabilities[index] as AccelCap,
+                                notifyParent: refresh,
+                                single: RuneEngine.capabilities.length <= 1,
+                              ));
+                        }
+                        if (RuneEngine.capabilities[index].type ==
+                            CapabilitiesIds["AudioCapability"]) {
+                          return Container(
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: AudioCapabilityWidget(
+                                cap: RuneEngine.capabilities[index] as AudioCap,
                                 notifyParent: refresh,
                                 single: RuneEngine.capabilities.length <= 1,
                               ));

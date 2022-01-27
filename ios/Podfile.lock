@@ -19,8 +19,12 @@ PODS:
     - Flutter
   - image_picker (0.0.1):
     - Flutter
+  - mic_stream (0.0.1):
+    - Flutter
   - MTBBarcodeScanner (5.0.11)
   - path_provider (0.0.1):
+    - Flutter
+  - "permission_handler (5.1.0+2)":
     - Flutter
   - platform_device_id (0.0.1):
     - Flutter
@@ -43,7 +47,9 @@ DEPENDENCIES:
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - mic_stream (from `.symlinks/plugins/mic_stream/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
   - runevm_fl (from `.symlinks/plugins/runevm_fl/ios`)
   - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
@@ -71,8 +77,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  mic_stream:
+    :path: ".symlinks/plugins/mic_stream/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   platform_device_id:
     :path: ".symlinks/plugins/platform_device_id/ios"
   runevm_fl:
@@ -95,8 +105,10 @@ SPEC CHECKSUMS:
   flutter_appauth: 05c3778a1e4ae23364dd2ef37cbae14b244f646b
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   image_picker: 9aa50e1d8cdacdbed739e925b7eea16d014367e6
+  mic_stream: 9e7c9fe19d0d8bd0d273bd5428bbd13cab6f4429
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   path_provider: d1e9807085df1f9cc9318206cd649dc0b76be3de
+  permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   runevm_fl: c71862cca794d7742220fcae7383c6fd365b16d7
   sensors_plus: 5717760720f7e6acd96fdbd75b7428f5ad755ec2

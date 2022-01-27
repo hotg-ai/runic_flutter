@@ -79,8 +79,8 @@ class _CameraScreenState extends State<CameraScreen>
       if (!controller!.value.isInitialized) {
         return Center(
           child: Container(
-              width: 84,
-              height: 84,
+              width: 32,
+              height: 32,
               child: LoadingIndicator(
                   indicatorType: Indicator.ballGridBeat,
 
@@ -430,13 +430,19 @@ class _CameraScreenState extends State<CameraScreen>
             showBackButton && (loading || RuneEngine.executionTime > 0.0)
                 ? Positioned(
                     bottom: 20,
-                    height: 82,
+                    height: 120,
                     left: 0,
                     right: 0,
                     child: loading &&
                             (RuneEngine.executionTime > 250 ||
                                 RuneEngine.executionTime == 0)
-                        ? LoadingScreen()
+                        ? Container(
+                            alignment: Alignment.center,
+                            child: Text("Running...",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white.withAlpha(100))))
                         : Container(
                             alignment: Alignment.center,
                             child: Text(

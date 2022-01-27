@@ -13,10 +13,18 @@ class Registry {
     print("Received $bytesIn/$totalBytes");
   };
   static Future<Uint8List> downloadWASM(String urlString) async {
-    List<String> parts = urlString.split("#project_id=");
+    List<String> parts = urlString.split("project_id=");
     if (parts.length == 2) {
       urlString = parts[0];
-      Logs.projectID = int.tryParse(parts[1]);
+      int? projectID = int.tryParse(parts[1]);
+      if (projectID != null) Logs.init(projectID);
+    } else {
+      List<String> parts = urlString.split("&project_id=");
+      if (parts.length == 2) {
+        urlString = parts[0];
+        int? projectID = int.tryParse(parts[1]);
+        if (projectID != null) Logs.init(projectID);
+      }
     }
     final url = Uri.parse(urlString.trim());
     final client = http.Client();

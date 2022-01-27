@@ -12,4 +12,6 @@ class RawCap {
   int type = CapabilitiesIds["RawCapability"]!;
   Uint8List? raw;
   dynamic parameters;
+
+  prepData() {}
 }

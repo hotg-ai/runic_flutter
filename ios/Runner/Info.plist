@@ -42,6 +42,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>App needs the camera for image input</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Device Info needed for model logging</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>App need microphone  access for audio input</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -61,8 +63,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Device Info needed for model logging</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

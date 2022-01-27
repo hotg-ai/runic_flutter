@@ -1,9 +1,6 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:runic_flutter/core/logs.dart';
-import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/deployed_screen.dart';
 import 'package:runic_flutter/modules/history_screen.dart';
@@ -15,7 +12,6 @@ import 'package:runic_flutter/modules/splash_screen.dart';
 import 'package:runic_flutter/modules/url_loading_screen.dart';
 
 void main() async {
-  Logs.init();
   if (kIsWeb) {
     //check if rune url parameter is present.
     String uri = Uri.base.query;
