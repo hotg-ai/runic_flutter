@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (HFAuth.isLoggedIn) {
         print("AUTH0logged in with ${HFAuth.profile}");
       } else {
-        await HFAuth.login();
+        //await HFAuth.login();
       }
       setState(() {});
     }

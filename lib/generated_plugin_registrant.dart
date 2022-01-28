@@ -13,6 +13,7 @@ import 'package:platform_device_id_web/platform_device_id_web.dart';
 import 'package:runevm_fl/runevm_fl_web.dart';
 import 'package:sensors_plus_web/sensors_plus_web.dart';
 import 'package:share_plus_web/share_plus_web.dart';
+import 'package:uni_links_web/uni_links_web.dart';
 import 'package:url_launcher_web/url_launcher_web.dart';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -27,6 +28,7 @@ void registerPlugins(Registrar registrar) {
   RunevmFlWeb.registerWith(registrar);
   SensorsPlugin.registerWith(registrar);
   SharePlusPlugin.registerWith(registrar);
+  UniLinksPlugin.registerWith(registrar);
   UrlLauncherPlugin.registerWith(registrar);
   registrar.registerMessageHandler();
 }

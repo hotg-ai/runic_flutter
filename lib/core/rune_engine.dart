@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -32,11 +33,89 @@ class RuneEngine {
     return logs;
   }
 
+  static bool isYoloModel() {
+    if (runeMeta["rune_graph_parsed"]) {
+      if (runeMeta["rune_graph"].containsKey("models")) {
+        if (runeMeta["rune_graph"]["models"].containsKey("yolo")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static getMeta(Uint8List bytes) {
+    runeMeta["rune_graph"] = {};
+    runeMeta["rune_graph_parsed"] = false;
+    ;
+    List<int> rune_graph = utf8.encode("rune_graph");
+    List<int> open = utf8.encode("{");
+    List<int> close = utf8.encode("}");
+    for (int i = 0; i < bytes.length; i++) {
+      if (runeMeta["rune_graph_parsed"] == false &&
+          i + rune_graph.length < bytes.length) {
+        int match = 0;
+        for (int c = 0; c < rune_graph.length; c++) {
+          if (bytes[i + c] == rune_graph[c]) {
+            match++;
+          }
+        }
+        if (match == rune_graph.length) {
+          int e = i + rune_graph.length;
+          int endPos = 0;
+          int level = 0;
+          while (e < bytes.length && level >= 0) {
+            int matchOpen = 0;
+            for (int s = 0; s < open.length; s++) {
+              if (bytes[e + s] == open[s]) {
+                matchOpen++;
+              }
+            }
+            if (matchOpen == open.length) {
+              level++;
+              print("{ on $e $level");
+            }
+            int matchClose = 0;
+            for (int s = 0; s < close.length; s++) {
+              if (bytes[e + s] == close[s]) {
+                matchClose++;
+              }
+            }
+            if (matchClose == close.length) {
+              level--;
+              print("} on $e $level");
+            }
+
+            if (level == 0) {
+              level = -1;
+              endPos = e + close.length;
+            }
+            e++;
+          }
+          try {
+            String s = new String.fromCharCodes(
+                bytes.sublist(i + rune_graph.length, endPos));
+            print(s);
+            print(s.length);
+
+            runeMeta["rune_graph"] = jsonDecode(s);
+            print(runeMeta["rune_graph"]);
+            runeMeta["rune_graph_parsed"] = true;
+          } on FormatException catch (e) {
+            print('error ${e.toString()}');
+          }
+        }
+      }
+    }
+  }
+
   static load() async {
     RuneEngine.executionTime = 0.0;
     RuneEngine.output = {"type": "none", "output": "-"};
     print("RunevmFl.load ${RuneEngine.runeBytes.length}");
     //Rune
+    getMeta(RuneEngine.runeBytes);
+
     await RunevmFl.load(RuneEngine.runeBytes);
     manifest = await RunevmFl.manifest;
     capabilities = [];
@@ -66,7 +145,7 @@ class RuneEngine {
             hz: cap.containsKey("hz") ? cap["hz"] : 16000,
             ms: cap.containsKey("sample_duration_ms")
                 ? cap["sample_duration_ms"]
-                : 16000);
+                : 1000);
         audioCap.parameters = cap;
         capabilities.add(audioCap);
       }
@@ -188,6 +267,7 @@ class RuneEngine {
           "output":
               "${runeOutput.length > 10000 ? runeOutput.substring(0, 10000) : runeOutput}"
         };
+        print("OUT: >?>>> $runeOutput");
         if (RuneEngine.output["type"] == "String") {
           dynamic out = {};
           if (RuneEngine.output["output"] == "error") {
@@ -212,7 +292,7 @@ class RuneEngine {
           } else if (out.containsKey("elements")) {
             List<dynamic> outList = out["elements"];
             print("${out["elements"].length}");
-            if (runeMeta["name"] == "hotg-ai/yolo_v5") {
+            if (isYoloModel()) {
               print("out[elements].length ${out["elements"].length}");
               RuneEngine.objects = [];
               for (int i = 0; i < outList.length; i += 6) {
@@ -240,7 +320,7 @@ class RuneEngine {
         }
       } else if (runeOutput is List) {
         print("Its a list!");
-        if (runeMeta["name"] == "hotg-ai/yolo_v5") {
+        if (isYoloModel()) {
           RuneEngine.objects = [];
           for (int i = 0; i < runeOutput.length; i += 6) {
             double confidence = runeOutput[i + 4];

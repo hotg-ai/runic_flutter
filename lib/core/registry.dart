@@ -31,6 +31,10 @@ class Registry {
     final request = http.Request('GET', url);
 
     final response = await client.send(request);
+
+    if (response.contentLength! > 50000000) {
+      return await response.stream.toBytes();
+    }
     final stream = response.stream;
     List<int> runeBytes = [];
     await for (var data in stream) {
