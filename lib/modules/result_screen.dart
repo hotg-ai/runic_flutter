@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/widgets/background.dart';
+import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -72,10 +74,48 @@ class _ResultScreenState extends State<ResultScreen> {
           body: Container(
               padding: EdgeInsets.fromLTRB(24, 0, 24, 80),
               child: ListView.builder(
-                  itemCount: 2,
+                  itemCount: 3,
                   itemBuilder: (context, index) {
-                    print(RuneEngine.output["type"]);
-                    if (index == 0) {
+                    if (index == 0 &&
+                        RuneEngine.capabilities[0].type ==
+                            CapabilitiesIds["RawCapability"]) {
+                      return new Card(
+                          shape: RoundedRectangleBorder(
+                            //side: BorderSide(color: Colors.white.withAlpha(50), width: 2),
+                            side: BorderSide(
+                                color: Colors.white.withAlpha(30), width: 1),
+                            borderRadius: BorderRadius.circular(19.0),
+                          ),
+                          color: Colors.white.withAlpha(0),
+                          margin: EdgeInsets.all(0),
+                          child: Container(
+                            //margin: EdgeInsets.fromLTRB(4, 4, 4, 4),
+                            height: 320,
+                            //padding: EdgeInsets.all(3),
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16.0),
+                                child: Container(
+                                    color: Colors.white.withAlpha(30),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                    child: Stack(children: [
+                                      Center(
+                                          child: Container(
+                                              height: 256,
+                                              width: 256,
+                                              color: Colors.white,
+                                              child: Stack(children: [
+                                                FittedBox(
+                                                  child: Text(
+                                                      "${RuneEngine.output["output"]}"),
+                                                  fit: BoxFit.fill,
+                                                ),
+                                              ])))
+                                    ]))),
+                          ));
+                    }
+                    if (index == 0 &&
+                        RuneEngine.capabilities[0].type ==
+                            CapabilitiesIds["ImageCapability"]) {
                       return RuneEngine.output["type"] == "none"
                           ? Container()
                           : new Card(
@@ -99,6 +139,17 @@ class _ResultScreenState extends State<ResultScreen> {
                                         padding:
                                             EdgeInsets.fromLTRB(0, 0, 0, 0),
                                         child: Stack(children: [
+                                          RuneEngine.output
+                                                  .containsKey("elements")
+                                              ? Image.memory(
+                                                  (RuneEngine.capabilities[0]
+                                                          as ImageCap)
+                                                      .thumb!,
+                                                  fit: BoxFit.cover,
+                                                  width: double.infinity,
+                                                  height: double.infinity,
+                                                )
+                                              : Container(),
                                           RuneEngine.output["type"] == "Objects"
                                               ? Center(
                                                   child: Container(
@@ -108,8 +159,9 @@ class _ResultScreenState extends State<ResultScreen> {
                                                       child: Stack(children: [
                                                         FittedBox(
                                                           child: Image.memory(
-                                                            RuneEngine
-                                                                .capabilities[0]
+                                                            (RuneEngine.capabilities[
+                                                                        0]
+                                                                    as ImageCap)
                                                                 .thumb!,
                                                             fit: BoxFit.fill,
                                                           ),
@@ -158,6 +210,17 @@ class _ResultScreenState extends State<ResultScreen> {
                               ));
                     }
                     if (index == 1) {
+                      return RuneEngine.output.containsKey("elements")
+                          ? Container(
+                              padding: EdgeInsets.all(12),
+                              child: Center(
+                                  child: Text(
+                                "${RuneEngine.output["elements"]}",
+                                style: TextStyle(color: Colors.white),
+                              )))
+                          : Container();
+                    }
+                    if (index == 2) {
                       return Row(mainAxisSize: MainAxisSize.max, children: [
                         Expanded(
                             child: Container(
@@ -283,8 +346,8 @@ class ShapePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // TODO: implement paint
     var paint = Paint()
-      ..color = Colors.green
-      ..strokeWidth = 2
+      ..color = indigoBlueColor
+      ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;
 
     paint.style = PaintingStyle.stroke;
@@ -293,7 +356,7 @@ class ShapePainter extends CustomPainter {
       print(objects);
       final textStyle = TextStyle(
         color: Colors.white,
-        fontSize: 14,
+        fontSize: 8,
       );
       final textSpan = TextSpan(
         text: object["name"],
@@ -313,12 +376,12 @@ class ShapePainter extends CustomPainter {
               object["x"] * size.width - object["w"] * size.width / 2,
               object["y"] * size.height - object["h"] * size.height / 2,
               object["w"] * size.width,
-              18),
+              11),
           paint);
       paint.style = PaintingStyle.stroke;
       textPainter.paint(
           canvas,
-          Offset(object["x"] * size.width - object["w"] * size.width / 2 + 5,
+          Offset(object["x"] * size.width - textPainter.width / 2,
               object["y"] * size.height - object["h"] * size.height / 2 + 0));
       canvas.drawRect(
           new Rect.fromLTWH(

@@ -2,10 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
+import 'package:runic_flutter/modules/log_screen.dart';
 import 'package:runic_flutter/modules/result_screen.dart';
+import 'package:runic_flutter/utils/error_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
+import 'package:runic_flutter/widgets/capabilities/accel_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/accel_capability_widget.dart';
+import 'package:runic_flutter/widgets/capabilities/audio_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/audio_capability_widget.dart';
+import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/image_capability_widget.dart';
+import 'package:runic_flutter/widgets/capabilities/rand_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/rand_capability_widget.dart';
+import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
+import 'package:runic_flutter/widgets/capabilities/raw_capability_widget.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
 
 class RuneScreen extends StatefulWidget {
@@ -19,7 +30,7 @@ class _RuneScreenState extends State<RuneScreen> {
   bool show = true;
   bool showRest = true;
   bool loading = false;
-
+  bool _error = false;
   refresh() {
     setState(() {});
   }
@@ -59,7 +70,11 @@ class _RuneScreenState extends State<RuneScreen> {
     setState(() {
       loading = false;
     });
-    if (RuneEngine.output["type"] != "String") {
+    if (RuneEngine.output["type"] == "Error") {
+      setState(() {
+        _error = true;
+      });
+    } else if (RuneEngine.output["type"] != "String") {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ResultScreen()),
@@ -71,6 +86,7 @@ class _RuneScreenState extends State<RuneScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(RuneEngine.manifest);
     return Stack(children: [
       Background(),
       Scaffold(
@@ -124,16 +140,59 @@ class _RuneScreenState extends State<RuneScreen> {
             Container(
                 padding: EdgeInsets.fromLTRB(24, 0, 24, 80),
                 child: ListView.builder(
-                    itemCount: 2 + RuneEngine.manifest.length,
+                    itemCount: 3 + RuneEngine.manifest.length,
                     itemBuilder: (context, index) {
                       if (index < RuneEngine.manifest.length) {
-                        return Container(
-                            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            child: ImageCapabilityWidget(
-                              cap: RuneEngine.capabilities[index],
-                              notifyParent: refresh,
-                              single: RuneEngine.capabilities.length <= 1,
-                            ));
+                        if (RuneEngine.capabilities[index].type ==
+                            CapabilitiesIds["ImageCapability"]) {
+                          return Container(
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: ImageCapabilityWidget(
+                                cap: RuneEngine.capabilities[index] as ImageCap,
+                                notifyParent: refresh,
+                                single: RuneEngine.capabilities.length <= 1,
+                              ));
+                        }
+                        if (RuneEngine.capabilities[index].type ==
+                            CapabilitiesIds["RandCapability"]) {
+                          return Container(
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: RandomCapabilityWidget(
+                                cap: RuneEngine.capabilities[index] as RandCap,
+                                notifyParent: refresh,
+                                single: RuneEngine.capabilities.length <= 1,
+                              ));
+                        }
+                        if (RuneEngine.capabilities[index].type ==
+                            CapabilitiesIds["RawCapability"]) {
+                          return Container(
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: RawCapabilityWidget(
+                                cap: RuneEngine.capabilities[index],
+                                notifyParent: refresh,
+                                single: RuneEngine.capabilities.length <= 1,
+                              ));
+                        }
+                        if (RuneEngine.capabilities[index].type ==
+                            CapabilitiesIds["AccelCapability"]) {
+                          return Container(
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: AccelCapabilityWidget(
+                                cap: RuneEngine.capabilities[index] as AccelCap,
+                                notifyParent: refresh,
+                                single: RuneEngine.capabilities.length <= 1,
+                              ));
+                        }
+                        if (RuneEngine.capabilities[index].type ==
+                            CapabilitiesIds["AudioCapability"]) {
+                          return Container(
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: AudioCapabilityWidget(
+                                cap: RuneEngine.capabilities[index] as AudioCap,
+                                notifyParent: refresh,
+                                single: RuneEngine.capabilities.length <= 1,
+                              ));
+                        }
                       }
                       if (index == RuneEngine.manifest.length) {
                         return Container(
@@ -232,12 +291,63 @@ class _RuneScreenState extends State<RuneScreen> {
                                       ? Image.memory(_output["output"])
                                       : Container(),
                             );*/
-                      }
 
+                      }
+                      if (index == RuneEngine.manifest.length + 2) {
+                        return runTimeLogs();
+                      }
                       return Container();
                     })),
-            loading ? LoadingScreen() : MainMenu()
-          ]))
+            loading ? LoadingScreen() : MainMenu(),
+          ])),
+      _error
+          ? ErrorScreen(
+              description: RuneEngine.output["output"],
+              onClose: () {
+                setState(() {
+                  _error = false;
+                });
+              })
+          : Container()
     ]);
+  }
+
+  Widget runTimeLogs() {
+    return Container(
+      height: 42,
+      margin: EdgeInsets.only(top: 11, bottom: 11),
+      decoration: new BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 6,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+          borderRadius: BorderRadius.circular(20.5),
+          gradient: LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: [
+              charcoalGrey.withAlpha(125),
+              barneyPurpleColor.withAlpha(50),
+              indigoBlueColor.withAlpha(125),
+            ],
+          )),
+      child: RawMaterialButton(
+        elevation: 4.0,
+        child: new Text(
+          'Show Rune runtime logs',
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LogScreen()),
+          );
+        },
+      ),
+    );
   }
 }

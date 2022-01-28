@@ -28,7 +28,10 @@
   
   <title>Runic.js</title>
   <link rel="manifest" href="manifest.json">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"></script>
   <script src="plugins/jsQR.js" type="application/javascript"></script>
+          <!-- Adds the WebGL backend to the global backend registry -->
+          
   <script src="https://rune-registry.web.app/vm/runevm.js"></script>
 </head>
 <body style="background-color: #18141E;">
@@ -36,7 +39,7 @@
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
-    var serviceWorkerVersion = '683015924';
+    var serviceWorkerVersion = '1690772132';
     var scriptLoaded = false;
     function loadMainDartJs() {
       if (scriptLoaded) {

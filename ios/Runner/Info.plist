@@ -20,12 +20,30 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.auth0.flutterdemo</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>App needs the camera for image input</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Device Info needed for model logging</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>App need microphone  access for audio input</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -47,16 +65,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>CFBundleURLTypes</key>
-   <array>
-      <dict>
-         <key>CFBundleTypeRole</key>
-         <string>Editor</string>
-         <key>CFBundleURLSchemes</key>
-         <array>
-            <string>com.auth0.flutterdemo</string>
-         </array>
-      </dict>
-   </array>
 </dict>
 </plist>

@@ -10,9 +10,19 @@ class MainMenu extends StatelessWidget {
   final Function preLoad;
   final config = {"hide": false};
   MainMenu({Key? key, this.preLoad = _myDefaultFunc}) : super(key: key);
-
+  static String currentRoute = "home";
   static _myDefaultFunc() async {
     return null;
+  }
+
+  void _navigateTo(BuildContext context, String route) {
+    if (currentRoute == route) {
+      //same route do nothing
+    } else {
+      currentRoute = route;
+      Navigator.pop(context);
+      Navigator.pushNamed(context, route);
+    }
   }
 
   @override
@@ -64,10 +74,15 @@ class MainMenu extends StatelessWidget {
                               height: 28,
                               child: IconButton(
                                   padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                  onPressed: () {},
-                                  icon: Image.asset(
-                                    "assets/images/icons/icon_history.png",
-                                  ))),
+                                  onPressed: () {
+                                    _navigateTo(context, 'history');
+                                  },
+                                  icon: Opacity(
+                                      opacity:
+                                          currentRoute == "history" ? 1.0 : 0.5,
+                                      child: Image.asset(
+                                        "assets/images/icons/icon_history.png",
+                                      )))),
                           Positioned(
                               bottom: 28,
                               left: 2 * MediaQuery.of(context).size.width / 6 -
@@ -75,10 +90,15 @@ class MainMenu extends StatelessWidget {
                               height: 28,
                               child: IconButton(
                                   padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                  onPressed: () {},
-                                  icon: Image.asset(
-                                    "assets/images/icons/icon_chart.png",
-                                  ))),
+                                  onPressed: () {
+                                    _navigateTo(context, 'posts');
+                                  },
+                                  icon: Opacity(
+                                      opacity:
+                                          currentRoute == "posts" ? 1.0 : 0.5,
+                                      child: Image.asset(
+                                        "assets/images/icons/icon_chart.png",
+                                      )))),
                           Positioned(
                               bottom: 28,
                               left: 4 * MediaQuery.of(context).size.width / 6 -
@@ -86,10 +106,16 @@ class MainMenu extends StatelessWidget {
                               height: 28,
                               child: IconButton(
                                   padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                  onPressed: () {},
-                                  icon: Image.asset(
-                                    "assets/images/icons/icon_model.png",
-                                  ))),
+                                  onPressed: () {
+                                    _navigateTo(context, 'deployed');
+                                  },
+                                  icon: Opacity(
+                                      opacity: currentRoute == "deployed"
+                                          ? 1.0
+                                          : 0.5,
+                                      child: Image.asset(
+                                        "assets/images/icons/icon_model.png",
+                                      )))),
                           Positioned(
                               bottom: 28,
                               left: 5 * MediaQuery.of(context).size.width / 6 -
@@ -98,11 +124,14 @@ class MainMenu extends StatelessWidget {
                               child: IconButton(
                                   padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                                   onPressed: () {
-                                    Navigator.pushNamed(context, 'profile');
+                                    _navigateTo(context, 'profile');
                                   },
-                                  icon: Image.asset(
-                                    "assets/images/icons/icon_user.png",
-                                  ))),
+                                  icon: Opacity(
+                                      opacity:
+                                          currentRoute == "profile" ? 1.0 : 0.5,
+                                      child: Image.asset(
+                                        "assets/images/icons/icon_user.png",
+                                      )))),
                           Positioned(
                               top: -15,
                               left: MediaQuery.of(context).size.width / 2 - 60,
@@ -112,15 +141,20 @@ class MainMenu extends StatelessWidget {
                                   width: 50,
                                   child: IconButton(
                                       iconSize: 50,
+                                      splashRadius: 50,
                                       padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                                       onPressed: () async {
                                         config["hide"] = true;
                                         await preLoad();
-                                        Navigator.pushNamed(context, "home");
+                                        _navigateTo(context, "home");
                                       },
-                                      icon: Image.asset(
-                                        "assets/images/icons/icon_home.png",
-                                      ))))
+                                      icon: Opacity(
+                                          opacity: currentRoute == "home"
+                                              ? 1.0
+                                              : 0.5,
+                                          child: Image.asset(
+                                            "assets/images/icons/icon_home.png",
+                                          )))))
                         ]),
                       )))
         ]));

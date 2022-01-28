@@ -30,6 +30,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
+  CameraImage? currentImage;
   CameraController? controller;
   List<CameraDescription> cameras = [];
   bool enableAudio = false;
@@ -78,8 +79,8 @@ class _CameraScreenState extends State<CameraScreen>
       if (!controller!.value.isInitialized) {
         return Center(
           child: Container(
-              width: 84,
-              height: 84,
+              width: 32,
+              height: 32,
               child: LoadingIndicator(
                   indicatorType: Indicator.ballGridBeat,
 
@@ -99,13 +100,23 @@ class _CameraScreenState extends State<CameraScreen>
                   )),
         );
       }
-      return CameraPreview(
-        controller!,
-        child: RuneEngine.output["type"] == "Objects"
-            ? CustomPaint(
-                painter: ShapePainter(RuneEngine.objects), child: Container())
-            : Container(),
-      );
+
+      final size = MediaQuery.of(context).size;
+      final deviceRatio = size.width / size.height;
+      print(controller!.value.aspectRatio);
+      return Transform.scale(
+          scale: 0.7 / deviceRatio,
+          child: Center(
+              child: AspectRatio(
+                  aspectRatio: 1 / controller!.value.aspectRatio,
+                  child: CameraPreview(
+                    controller!,
+                    child: RuneEngine.output["type"] == "Objects"
+                        ? CustomPaint(
+                            painter: ShapePainter(RuneEngine.objects),
+                            child: Container())
+                        : Container(),
+                  ))));
     }
   }
 
@@ -185,7 +196,9 @@ class _CameraScreenState extends State<CameraScreen>
     } on CameraException catch (e) {
       _showCameraException(e);
     }
-
+    controller?.startImageStream((CameraImage image) {
+      currentImage = image;
+    });
     if (mounted) {
       setState(() {});
     }
@@ -236,14 +249,22 @@ class _CameraScreenState extends State<CameraScreen>
 
   run() async {
     loading = true;
-    setState(() {});
-    XFile shot = await controller!.takePicture();
-    Uint8List rawImage = await shot.readAsBytes();
-    List<Uint8List> data =
-        ImageUtils.convertImage(rawImage, widget.cap.parameters);
-    widget.cap.thumb = data[1];
-    Uint8List bytes = data[0];
-    widget.cap.raw = bytes;
+
+    if (kIsWeb) {
+      setState(() {});
+      XFile shot = await controller!.takePicture();
+      Uint8List rawImage = await shot.readAsBytes();
+      List<Uint8List> data =
+          ImageUtils.convertImage(rawImage, widget.cap.parameters);
+      widget.cap.thumb = data[1];
+      widget.cap.raw = data[0];
+    } else {
+      List<Uint8List> data =
+          ImageUtils.processCameraImage(currentImage!, widget.cap.parameters);
+      widget.cap.thumb = data[1];
+      Uint8List bytes = data[0];
+      widget.cap.raw = bytes;
+    }
 
     await RuneEngine.run();
     loading = false;
@@ -409,13 +430,19 @@ class _CameraScreenState extends State<CameraScreen>
             showBackButton && (loading || RuneEngine.executionTime > 0.0)
                 ? Positioned(
                     bottom: 20,
-                    height: 82,
+                    height: 120,
                     left: 0,
                     right: 0,
                     child: loading &&
                             (RuneEngine.executionTime > 250 ||
                                 RuneEngine.executionTime == 0)
-                        ? LoadingScreen()
+                        ? Container(
+                            alignment: Alignment.center,
+                            child: Text("Running...",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white.withAlpha(100))))
                         : Container(
                             alignment: Alignment.center,
                             child: Text(
