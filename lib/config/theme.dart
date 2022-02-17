@@ -15,7 +15,6 @@ const darkGreyBlue = Color.fromRGBO(39, 40, 83, 0.5);
 
 const purpliblue = Color.fromRGBO(125, 44, 255, 0.1);
 const brightMagenta = Color.fromRGBO(255, 0, 229, 0.13);
-var theme = ThemeData(fontFamily: 'Helvetica');
 
 final kInnerDecoration = BoxDecoration(
   color: Colors.white,

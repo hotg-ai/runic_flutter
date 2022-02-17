@@ -94,14 +94,15 @@ class _SplashScreenState extends State<SplashScreen> {
                     height: 42,
                   ),
                   Container(
+                      padding: EdgeInsets.fromLTRB(60, 0, 60, 0),
                       child: Center(
                           child: Text(
-                    "What's in a rune?",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600),
-                  ))),
+                        "Developer experience for edge computing",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600),
+                      ))),
                   Container(
                     height: 12,
                   ),
@@ -109,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       padding: EdgeInsets.fromLTRB(60, 20, 60, 60),
                       child: Center(
                           child: Text(
-                        "Rune is an orchestration tool for specifying how data should be processed, with an emphasis on the machine learning world, in a way which is portable and robust.",
+                        "We are building the developer experience tools and infrastructure for edge computing. Our goal is to make this space accessible to anyone in the world by building open systems that our community loves.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white,
@@ -199,7 +200,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       padding: EdgeInsets.fromLTRB(60, 0, 60, 0),
                       child: Center(
                           child: Text(
-                        "Accelerate development of TinyML apps with Rune",
+                        "Develop at warp speed",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white,
@@ -213,7 +214,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       padding: EdgeInsets.fromLTRB(60, 20, 60, 10),
                       child: Center(
                           child: Text(
-                        "Rune is a tiny container specifically designed to help you containerize TinyML applications across several platforms and devices. It is like docker but tinier.",
+                        "Accelerate development of edge AI with portable Rune containers.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white,
@@ -316,14 +317,15 @@ class _SplashScreenState extends State<SplashScreen> {
                     height: 42,
                   ),
                   Container(
+                      padding: EdgeInsets.fromLTRB(60, 0, 60, 0),
                       child: Center(
                           child: Text(
-                    "Welcome To RUNE",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600),
-                  ))),
+                        "Deploy on-device ML within minutes",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600),
+                      ))),
                   Container(
                     height: 12,
                   ),
@@ -331,7 +333,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       padding: EdgeInsets.fromLTRB(60, 20, 60, 60),
                       child: Center(
                           child: Text(
-                        "Welcome to tinyVerse by HOTG, where we will muse about tinyML and Machine Learning on tiny devices.",
+                        "Build and test an edge computing app within minutes using Hammer Forge.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white,

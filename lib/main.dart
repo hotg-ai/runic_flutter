@@ -69,6 +69,7 @@ class MyApp extends StatelessWidget {
     return FutureBuilder<void>(
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         return MaterialApp(
+          theme: ThemeData(fontFamily: 'Inconsolata'),
           initialRoute: RuneEngine.url != null ? 'url' : 'splash',
           onGenerateRoute: (settings) {
             switch (settings.name) {

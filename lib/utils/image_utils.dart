@@ -15,31 +15,46 @@ const List<Color> colors = [
 ];
 
 class ImageUtils {
-  static List<Uint8List> processCameraImage(
-      CameraImage image, Map<String, dynamic> parameters) {
+  static List<Uint8List> processCameraImage(CameraImage image,
+      Map<String, dynamic> parameters, CameraDescription cam) {
     return Platform.isAndroid
-        ? processCameraImageAndroid(image, parameters)
+        ? processCameraImageAndroid(image, parameters, cam.sensorOrientation)
         : processCameraImageIOS(image, parameters);
   }
 
   static List<Uint8List> processCameraImageAndroid(
-      CameraImage image, Map<String, dynamic> parameters) {
+      CameraImage image, Map<String, dynamic> parameters, int orientation) {
     int width = image.width;
     int height = image.height;
-    final img = ImageLib.Image(width, height); // Create Image buffer
 
+    final int uvRowStride = image.planes[1].bytesPerRow;
+    final int uvPixelStride = image.planes[1].bytesPerPixel!;
+
+    final img = ImageLib.Image(width, height); // Create Image buffer
+    print("Androdi image ${image.format} $parameters");
     // Fill image buffer with plane[0] from YUV420_888
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
+        final int uvIndex =
+            uvPixelStride * (x / 2).floor() + uvRowStride * (y / 2).floor();
         final int index = y * width + x;
-        final pixelColor = image.planes[0].bytes[index];
-        img.data[y * width + x] =
-            (0xFF << 24) | (pixelColor << 16) | (pixelColor << 8) | pixelColor;
+
+        final yp = image.planes[0].bytes[index];
+        final up = image.planes[1].bytes[uvIndex];
+        final vp = image.planes[2].bytes[uvIndex];
+        // Calculate pixel color
+        int r = (yp + vp * 1436 / 1024 - 179).round().clamp(0, 255);
+        int g = (yp - up * 46549 / 131072 + 44 - vp * 93604 / 131072 + 91)
+            .round()
+            .clamp(0, 255);
+        int b = (yp + up * 1814 / 1024 - 227).round().clamp(0, 255);
+        img.data[y * width + x] = (0xFF << 24) | (b << 16) | (g << 8) | r;
       }
     }
-
+    ImageLib.Image imgRot = ImageLib.copyRotate(img, orientation);
     // rsize/crop/grayscale
-    final thumbnail = ImageLib.copyResizeCropSquare(img, parameters["width"]);
+    final thumbnail =
+        ImageLib.copyResizeCropSquare(imgRot, parameters["width"]);
     List<int> thumb = ImageLib.writePng(thumbnail);
     //final thumbnail =
     //    imglib.grayscale(imglib.copyResize(img, width: 96, height: 96));

@@ -1,6 +1,6 @@
 
 let output;
-
+let logs = [];
 const capabilitiesDefinition = {
     1: "RandCapability",
     2: "AudioCapability",
@@ -23,9 +23,6 @@ class RuneCapability {
         this.type= type;
     }
     generate(dest,id) {
-        console.log("generate");
-        console.log(this.cap_id);
-        console.log(this.data.inputs[this.cap_id]);
         dest.set(this.data.inputs[this.cap_id], 0);
     }
     setParameter(key, value) {
@@ -40,7 +37,8 @@ class RuneCapability {
 class SerialOutput {
     consume(data) {
         const utf8 = new TextDecoder();
-        output=JSON.parse(utf8.decode(data));
+
+        output=utf8.decode(data);
     }
 }
 
@@ -56,36 +54,50 @@ class Bridge {
     }
     
     async call(bytes,lengths) {
-        this.log = [];
+     
+        logs=[]; 
         this.data.inputs=[];
         var pos=0;
         for(var i = 0;i<lengths.length;i++) {
             this.data.inputs[i]=bytes.subarray(pos, lengths[i]+pos);
             pos+=lengths[i];
         }
+
         await this.runtime.call();
+
         if(output.type_name=="f32") {
             return output.elements;
         }
-        return JSON.stringify(output);
+        return output;
     }
 
     async load(bytes) {
+        logs=[];
         this.cap_count = 0;
         this.manifest = [];
         const imports = {
             createCapability: (type) => new RuneCapability(this.cap_count++,this.manifest,this.data,type),
             createOutput: () => new SerialOutput(),
-            createModel: (mime, model_data) => rune.TensorFlowModel.loadTensorFlowLite(model_data),
-            log: (log) => { console.log("RUNE LOG:",log); this.log.push(log) },
+            createModel: (mime, model_data) => { 
+                if(mime=="application/tfjs-model") {
+                    return window.rune.loadTensorFlowJS(model_data);
+                } else {
+                    return window.rune.loadTensorFlowLite(model_data);
+                    
+                }
+                
+            },
+            log: (log) => { logs.push(JSON.stringify(log)); },
         };
         var view = new Uint8Array(bytes);
-        this.runtime=await rune.Runtime.load(view.buffer,imports);
+        await window.rune.tf.setBackend('wasm');
+        this.runtime=await window.rune.Runtime.load(view.buffer,imports);
+ 
         return JSON.stringify(this.manifest);
     }
 
     async getLogs() {
-        return this.log;
+        return logs;
     }
 }
 

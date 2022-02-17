@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -109,6 +110,43 @@ class _LogScreenState extends State<LogScreen> {
                     }
                     List<String> fields = "${logs[index]}".split("@@");
                     if (fields.length < 3) {
+                      try {
+                        Map<dynamic, dynamic> jsonFields =
+                            jsonDecode("${logs[index]}");
+                        if (jsonFields.containsKey("message")) {
+                          return ListTile(
+                            visualDensity:
+                                VisualDensity(horizontal: 0, vertical: -4),
+                            contentPadding: EdgeInsets.all(0),
+                            minVerticalPadding: 0,
+                            dense: true,
+                            leading: Text(
+                              jsonFields["level"],
+                              maxLines: 2,
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  leadingDistribution:
+                                      TextLeadingDistribution.proportional,
+                                  //height: 1,
+                                  fontFamily: "Open sans",
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white),
+                            ),
+                            title: Container(
+                                child: Text(
+                              jsonFields["message"] +
+                                  " [${jsonFields["target"]}]",
+                              style: TextStyle(
+                                  fontSize: 10,
+
+                                  //height: 1,
+                                  fontFamily: "Open sans",
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white),
+                            )),
+                          );
+                        }
+                      } catch (e) {}
                       return Container();
                     }
                     return ListTile(
