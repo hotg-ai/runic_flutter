@@ -10,18 +10,35 @@
   <component name="ChangeListManager">
     <list default="true" id="cb4675bf-d0c2-4ad8-b331-15d6381506ee" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins-dependencies" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase/public/assets/AssetManifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/firebase/public/assets/AssetManifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase/public/assets/FontManifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/firebase/public/assets/FontManifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase/public/assets/NOTICES" beforeDir="false" afterPath="$PROJECT_DIR$/firebase/public/assets/NOTICES" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase/public/assets/packages/runevm_fl/assets/bridge.js" beforeDir="false" afterPath="$PROJECT_DIR$/firebase/public/assets/packages/runevm_fl/assets/bridge.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase/public/flutter_service_worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/firebase/public/flutter_service_worker.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/firebase/public/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Info.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/theme.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/theme.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/core/analytics.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/core/analytics.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/core/logs.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/core/logs.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/core/registry.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/core/registry.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/core/rune_engine.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/core/rune_engine.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/modules/camera_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/modules/camera_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/modules/log_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/modules/log_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/modules/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/modules/splash_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/capabilities/raw_capability_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/capabilities/raw_capability_widget.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runic_flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/runic_flutter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/geerttrooskens/.android/avd/Pixel_2_XL_Edited_API_31.avd]" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>

@@ -1,23 +1,14 @@
-import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:blur/blur.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
-import 'package:runic_flutter/main.dart';
 import 'package:runic_flutter/modules/result_screen.dart';
-import 'package:runic_flutter/modules/rune_screen.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
-import 'package:runic_flutter/utils/loading_screen.dart';
-import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
-import 'package:runic_flutter/widgets/main_menu.dart';
 import 'package:camera/camera.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -33,6 +24,7 @@ class _CameraScreenState extends State<CameraScreen>
   CameraImage? currentImage;
   CameraController? controller;
   List<CameraDescription> cameras = [];
+  CameraDescription? _cameraDescription;
   bool enableAudio = false;
   XFile? imageFile;
   XFile? videoFile;
@@ -42,6 +34,8 @@ class _CameraScreenState extends State<CameraScreen>
   int camera = 0;
   bool live = false;
   bool loading = false;
+  ValueNotifier<bool>? buttonTrigger;
+
   @override
   void initState() {
     super.initState();
@@ -103,26 +97,30 @@ class _CameraScreenState extends State<CameraScreen>
 
       final size = MediaQuery.of(context).size;
       final deviceRatio = size.width / size.height;
-      print(controller!.value.aspectRatio);
+
       return Transform.scale(
-          scale: 0.7 / deviceRatio,
+          scale: 0.8 / deviceRatio,
           child: Center(
               child: AspectRatio(
-                  aspectRatio: 1 / controller!.value.aspectRatio,
-                  child: CameraPreview(
-                    controller!,
+            aspectRatio: 1 / controller!.value.aspectRatio,
+            child: InkWell(
+                onTap: () {},
+                child: CameraPreview(controller!,
                     child: RuneEngine.output["type"] == "Objects"
                         ? CustomPaint(
                             painter: ShapePainter(RuneEngine.objects),
                             child: Container())
-                        : Container(),
-                  ))));
+                        : Container())),
+          )));
     }
   }
 
   @override
   void dispose() {
     _ambiguate(WidgetsBinding.instance)?.removeObserver(this);
+    if (!kIsWeb) {
+      controller?.stopImageStream();
+    }
     controller?.dispose();
     super.dispose();
   }
@@ -144,64 +142,48 @@ class _CameraScreenState extends State<CameraScreen>
     super.didChangeAppLifecycleState(state);
   }
 
-  double _minAvailableExposureOffset = 0.0;
-  double _maxAvailableExposureOffset = 0.0;
-  double _minAvailableZoom = 1.0;
-  double _maxAvailableZoom = 1.0;
-
   void onNewCameraSelected(CameraDescription cameraDescription) async {
-    print(cameraDescription);
+    _cameraDescription = cameraDescription;
     if (controller != null) {
       await controller!.dispose();
     }
 
     final CameraController cameraController = CameraController(
         cameraDescription, kIsWeb ? ResolutionPreset.low : ResolutionPreset.low,
-        enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
+        enableAudio: false,
+        imageFormatGroup: kIsWeb
+            ? ImageFormatGroup.jpeg
+            : Platform.isAndroid
+                ? ImageFormatGroup.yuv420
+                : ImageFormatGroup.jpeg);
 
     controller = cameraController;
-    cameraController.setFlashMode(flash ? FlashMode.auto : FlashMode.off);
+    //cameraController.setFlashMode(flash ? FlashMode.auto : FlashMode.off);
     // If the controller is updated then update the UI.
     cameraController.addListener(() {
       print("async $mounted");
-      setState(() {});
+      //setState(() {});
       if (cameraController.value.hasError) {
         print('Camera error ${cameraController.value.errorDescription}');
-        //showInSnackBar(
-        //    'Camera error ${cameraController.value.errorDescription}');
+        showInSnackBar(
+            'Camera error ${cameraController.value.errorDescription}');
       }
     });
 
     try {
       await cameraController.initialize();
-      await Future.wait([
-        // The exposure mode is currently not supported on the web.
-        ...(!kIsWeb
-            ? [
-                cameraController
-                    .getMinExposureOffset()
-                    .then((value) => _minAvailableExposureOffset = value),
-                cameraController
-                    .getMaxExposureOffset()
-                    .then((value) => _maxAvailableExposureOffset = value)
-              ]
-            : []),
-        cameraController
-            .getMaxZoomLevel()
-            .then((value) => _maxAvailableZoom = value),
-        cameraController
-            .getMinZoomLevel()
-            .then((value) => _minAvailableZoom = value),
-      ]);
     } on CameraException catch (e) {
       _showCameraException(e);
     }
-    controller?.startImageStream((CameraImage image) {
-      currentImage = image;
-    });
+    if (!kIsWeb) {
+      controller?.startImageStream((CameraImage image) {
+        currentImage = image;
+      });
+    }
     if (mounted) {
       setState(() {});
     }
+    if (kIsWeb) {}
   }
 
   void _showCameraException(CameraException e) {
@@ -228,14 +210,14 @@ class _CameraScreenState extends State<CameraScreen>
     //_manifest = jsonDecode(await RunevmFl.manifest);
     //print("_manifest: $_manifest");
     //init cam
+
     try {
       cameras = await availableCameras();
+      print(cameras);
     } on CameraException catch (e) {
       print("${e.code}, ${e.description}");
     }
-    for (CameraDescription cameraDescription in cameras) {
-      print("$cameraDescription");
-    }
+
     onNewCameraSelected(cameras[camera]);
   }
 
@@ -259,8 +241,8 @@ class _CameraScreenState extends State<CameraScreen>
       widget.cap.thumb = data[1];
       widget.cap.raw = data[0];
     } else {
-      List<Uint8List> data =
-          ImageUtils.processCameraImage(currentImage!, widget.cap.parameters);
+      List<Uint8List> data = ImageUtils.processCameraImage(
+          currentImage!, widget.cap.parameters, _cameraDescription!);
       widget.cap.thumb = data[1];
       Uint8List bytes = data[0];
       widget.cap.raw = bytes;
@@ -347,7 +329,8 @@ class _CameraScreenState extends State<CameraScreen>
                             : Icon(Icons.flash_off, color: darkGreyBlue),
                         onPressed: () {
                           flash = !flash;
-                          onNewCameraSelected(cameras[camera]);
+                          //onNewCameraSelected(cameras[camera]);
+                          setState(() {});
                         },
                       ))),
                       InkWell(
@@ -403,7 +386,7 @@ class _CameraScreenState extends State<CameraScreen>
                     child: Blur(
                         blur: 10,
                         blurColor: Colors.white24,
-                        colorOpacity: 0.2,
+                        colorOpacity: 0.3,
                         child: Container(
                           color: darkBlueBlue.withAlpha(0),
                         )))
@@ -417,11 +400,11 @@ class _CameraScreenState extends State<CameraScreen>
                     child: Row(children: [
                       Expanded(
                           child: Text("${RuneEngine.output["output"]}",
-                              maxLines: 2,
+                              //maxLines: 2,
                               overflow: TextOverflow.clip,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 14,
                                 color: Colors.black,
                                 fontWeight: FontWeight.w500,
                               )))

@@ -21,13 +21,16 @@ class RawCapabilityWidget extends StatelessWidget {
   }
 
   Uint8List stringToUtf8(String text) {
-    while (text.length < 1500) {
-      text = text + " ";
+    List<int> out = List.from(utf8.encode(text));
+    print(out);
+    if (out.length > 1500) {
+      return Uint8List.fromList(out.sublist(0, 1500));
+    } else {
+      while (out.length < 1500) {
+        out.add(0);
+      }
     }
-    while (text.length > 1500) {
-      text = text.substring(0, text.length - 1);
-    }
-    return new Uint8List.fromList(utf8.encode(text));
+    return Uint8List.fromList(out);
   }
 
   final FocusNode inputFocusNode = FocusNode();

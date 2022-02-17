@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-import 'dart:isolate';
+
 import 'dart:typed_data';
-import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/core/analytics.dart';
-import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/core/logs.dart';
+import 'package:runic_flutter/core/rune_graph.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/audio_cap.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
@@ -19,6 +15,7 @@ import 'package:runic_flutter/widgets/capabilities/accel_cap.dart';
 class RuneEngine {
   static double executionTime = 0.0;
   static Uint8List runeBytes = new Uint8List(0);
+  static RuneGraph? runeGraph;
   static Map<String, dynamic> runeMeta = {};
   static Map<String, dynamic> output = {"type": "none", "output": "-"};
   //Rune
@@ -34,10 +31,12 @@ class RuneEngine {
   }
 
   static bool isYoloModel() {
-    if (runeMeta["rune_graph_parsed"]) {
-      if (runeMeta["rune_graph"].containsKey("models")) {
-        if (runeMeta["rune_graph"]["models"].containsKey("yolo")) {
-          return true;
+    if (runeGraph != null) {
+      if (runeGraph!.parsed) {
+        if (runeGraph!.json.containsKey("models")) {
+          if (runeGraph!.json["models"].containsKey("yolo")) {
+            return true;
+          }
         }
       }
     }
@@ -45,68 +44,9 @@ class RuneEngine {
   }
 
   static getMeta(Uint8List bytes) {
-    runeMeta["rune_graph"] = {};
-    runeMeta["rune_graph_parsed"] = false;
-    ;
-    List<int> rune_graph = utf8.encode("rune_graph");
-    List<int> open = utf8.encode("{");
-    List<int> close = utf8.encode("}");
-    for (int i = 0; i < bytes.length; i++) {
-      if (runeMeta["rune_graph_parsed"] == false &&
-          i + rune_graph.length < bytes.length) {
-        int match = 0;
-        for (int c = 0; c < rune_graph.length; c++) {
-          if (bytes[i + c] == rune_graph[c]) {
-            match++;
-          }
-        }
-        if (match == rune_graph.length) {
-          int e = i + rune_graph.length;
-          int endPos = 0;
-          int level = 0;
-          while (e < bytes.length && level >= 0) {
-            int matchOpen = 0;
-            for (int s = 0; s < open.length; s++) {
-              if (bytes[e + s] == open[s]) {
-                matchOpen++;
-              }
-            }
-            if (matchOpen == open.length) {
-              level++;
-              print("{ on $e $level");
-            }
-            int matchClose = 0;
-            for (int s = 0; s < close.length; s++) {
-              if (bytes[e + s] == close[s]) {
-                matchClose++;
-              }
-            }
-            if (matchClose == close.length) {
-              level--;
-              print("} on $e $level");
-            }
-
-            if (level == 0) {
-              level = -1;
-              endPos = e + close.length;
-            }
-            e++;
-          }
-          try {
-            String s = new String.fromCharCodes(
-                bytes.sublist(i + rune_graph.length, endPos));
-            print(s);
-            print(s.length);
-
-            runeMeta["rune_graph"] = jsonDecode(s);
-            print(runeMeta["rune_graph"]);
-            runeMeta["rune_graph_parsed"] = true;
-          } on FormatException catch (e) {
-            print('error ${e.toString()}');
-          }
-        }
-      }
-    }
+    //parse the runeGraph from raw bytes
+    runeGraph = new RuneGraph(bytes);
+    RuneEngine.runeMeta["name"] = runeGraph?.runeName;
   }
 
   static load() async {
@@ -115,8 +55,24 @@ class RuneEngine {
     print("RunevmFl.load ${RuneEngine.runeBytes.length}");
     //Rune
     getMeta(RuneEngine.runeBytes);
-
-    await RunevmFl.load(RuneEngine.runeBytes);
+    Logs.sendTelemetryToSocket({"type": "rune/load/started"});
+    int startTime = DateTime.now().millisecondsSinceEpoch;
+    try {
+      await RunevmFl.load(RuneEngine.runeBytes);
+    } catch (e) {
+      int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
+      Logs.sendTelemetryToSocket({
+        "type": "rune/load/failed",
+        "error": e.toString(),
+        "message": e.toString(),
+        "milliseconds": totalTime.toString(),
+      });
+    }
+    int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
+    Logs.sendTelemetryToSocket({
+      "type": "rune/load/succeeded",
+      "milliseconds": totalTime.toString(),
+    });
     manifest = await RunevmFl.manifest;
     capabilities = [];
     print(manifest);
@@ -168,12 +124,31 @@ class RuneEngine {
 
       print("Bytes total ${bytes.length}");
       int start = DateTime.now().microsecondsSinceEpoch;
+      Logs.sendTelemetryToSocket({"type": "rune/predict/started"});
+
       dynamic runeOutput = await RunevmFl.runRune(bytes.toBytes(), lengths);
       int time = DateTime.now().microsecondsSinceEpoch - start;
+      if (runeOutput is String) {
+        if (runeOutput.toLowerCase() == "error") {
+          Logs.sendTelemetryToSocket({
+            "type": "rune/predict/failed",
+            "error": "error",
+            "message": "error",
+            "milliseconds": time.toString(),
+          });
+        } else {
+          Logs.sendTelemetryToSocket({
+            "type": "rune/predict/succeeded",
+            "milliseconds": time.toString(),
+          });
+        }
+      } else {}
+
       executionTime = time * 0.001;
+      print("output generated");
       Analytics.addToHistory(
           "${runeMeta["name"]} executed in ${executionTime.round()} ms");
-      Logs.sendLogs();
+
       RuneEngine.output = {
         "type": "String",
         "output": "no valid output type detected"
@@ -262,12 +237,7 @@ class RuneEngine {
       ];
 
       if (runeOutput is String) {
-        RuneEngine.output = {
-          "type": "String",
-          "output":
-              "${runeOutput.length > 10000 ? runeOutput.substring(0, 10000) : runeOutput}"
-        };
-        print("OUT: >?>>> $runeOutput");
+        RuneEngine.output = {"type": "String", "output": runeOutput};
         if (RuneEngine.output["type"] == "String") {
           dynamic out = {};
           if (RuneEngine.output["output"] == "error") {
@@ -276,7 +246,6 @@ class RuneEngine {
             out = json.decode(runeOutput);
           }
           if (out is List) {
-            print(out[0]["type"]);
             if (out.length == 2) {
               if (out[0].containsKey("elements") &&
                   out[1].containsKey("elements") &&
@@ -291,9 +260,7 @@ class RuneEngine {
             }
           } else if (out.containsKey("elements")) {
             List<dynamic> outList = out["elements"];
-            print("${out["elements"].length}");
             if (isYoloModel()) {
-              print("out[elements].length ${out["elements"].length}");
               RuneEngine.objects = [];
               for (int i = 0; i < outList.length; i += 6) {
                 double confidence = outList[i + 4];
@@ -315,12 +282,16 @@ class RuneEngine {
             } else {
               RuneEngine.output["output"] =
                   "${json.decode(RuneEngine.output["output"])["elements"]}";
+              RuneEngine.output["output"] =
+                  (RuneEngine.output["output"].length < 1001)
+                      ? RuneEngine.output["output"]
+                      : RuneEngine.output["output"].substring(0, 1000);
             }
           }
         }
       } else if (runeOutput is List) {
-        print("Its a list!");
         if (isYoloModel()) {
+          print("isYoloModel");
           RuneEngine.objects = [];
           for (int i = 0; i < runeOutput.length; i += 6) {
             double confidence = runeOutput[i + 4];
@@ -342,9 +313,11 @@ class RuneEngine {
           };
         }
       }
+      Logs.sendLogs();
       return RuneEngine.output;
     } catch (e) {
       RuneEngine.output = {"type": "Error", "output": "Error ${e.toString()}"};
+      Logs.sendLogs();
       return RuneEngine.output;
     }
   }

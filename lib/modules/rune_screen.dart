@@ -61,15 +61,20 @@ class _RuneScreenState extends State<RuneScreen> {
     //print("_manifest: $_manifest");
   }
 
-  _run() async {
-    setState(() {
-      loading = true;
-    });
+  _run([bool silent = false]) async {
+    if (!silent) {
+      setState(() {
+        loading = true;
+      });
+    }
+
     await Future.delayed(Duration(milliseconds: 20));
     await RuneEngine.run();
+
     setState(() {
       loading = false;
     });
+
     if (RuneEngine.output["type"] == "Error") {
       setState(() {
         _error = true;
@@ -190,6 +195,7 @@ class _RuneScreenState extends State<RuneScreen> {
                               child: AudioCapabilityWidget(
                                 cap: RuneEngine.capabilities[index] as AudioCap,
                                 notifyParent: refresh,
+                                run: _run,
                                 single: RuneEngine.capabilities.length <= 1,
                               ));
                         }
