@@ -2,9 +2,12 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_depot.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
+import 'package:runic_flutter/modules/rune_screen.dart';
+import 'package:runic_flutter/utils/error_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
 
@@ -20,6 +23,7 @@ class DeployedScreen extends StatefulWidget {
 class _DeployedScreenState extends State<DeployedScreen> {
   List<dynamic> searchList = [];
   bool loading = false;
+  bool _error = false;
   @override
   void initState() {
     super.initState();
@@ -199,15 +203,23 @@ class _DeployedScreenState extends State<DeployedScreen> {
                       setState(() {
                         loading = true;
                       });
-
-                      RuneEngine.runeBytes =
-                          await Registry.downloadWASM(urlTextController.text);
+                      Logs log = new Logs();
+                      RuneScreen.logs = log;
+                      RuneEngine.runeBytes = await Registry.downloadWASM(
+                          urlTextController.text, log);
+                      if (RuneEngine.runeBytes == null) {
+                        setState(() {
+                          loading = false;
+                          _error = true;
+                        });
+                        return;
+                      }
                       RuneEngine.runeMeta = {
                         "name": "/${urlTextController.text}".split("/").last,
                         "description": "Fetched Rune"
                       };
                       RuneDepot.addRune(
-                          RuneEngine.runeBytes, RuneEngine.runeMeta);
+                          RuneEngine.runeBytes!, RuneEngine.runeMeta);
                       await fetchRunes();
                       setState(() {
                         loading = false;
@@ -445,6 +457,15 @@ class _DeployedScreenState extends State<DeployedScreen> {
       ),
       MainMenu(),
       loading ? LoadingScreen() : Container(),
+      _error
+          ? ErrorScreen(
+              description: "Error fetching and deploying rune",
+              onClose: () {
+                setState(() {
+                  _error = false;
+                });
+              })
+          : Container()
     ]);
   }
 }

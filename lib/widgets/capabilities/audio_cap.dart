@@ -107,7 +107,6 @@ class AudioCap extends RawCap {
           maxDifference = (sampleRateCalc - 48000).abs();
           sampleRate = 48000;
         }
-        sampleRate = 48000;
         print("$sampleRateCalc $sampleRate");
         if (sampleRate == 48000) {
           for (int i = 2; i < stream.length; i += 3) {

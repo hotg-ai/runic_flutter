@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/log_screen.dart';
 import 'package:runic_flutter/modules/result_screen.dart';
@@ -21,30 +24,46 @@ import 'package:runic_flutter/widgets/main_menu.dart';
 
 class RuneScreen extends StatefulWidget {
   RuneScreen({Key? key}) : super(key: key);
-
+  static Logs logs = new Logs();
   @override
   _RuneScreenState createState() => _RuneScreenState();
 }
 
-class _RuneScreenState extends State<RuneScreen> {
+class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
   bool show = true;
   bool showRest = true;
   bool loading = false;
   bool _error = false;
+
   refresh() {
     setState(() {});
   }
 
+  bool _turn = false;
   @override
   void initState() {
     super.initState();
-
+    if (RuneScreen.logs.isConnected()) {
+      beat();
+    }
     //if no rune is loaded go back to home screen
-    if (RuneEngine.runeBytes.length == 0) {
+    if (RuneEngine.runeBytes!.length == 0) {
       print("Falling back to home screen");
       Navigator.pushNamed(context, "home");
     } else {
       loadRune();
+    }
+  }
+
+  beat() {
+    setState(() {
+      _turn = !_turn;
+    });
+
+    if (mounted) {
+      new Future.delayed(const Duration(milliseconds: heartBeatInterval), () {
+        beat();
+      });
     }
   }
 
@@ -53,7 +72,7 @@ class _RuneScreenState extends State<RuneScreen> {
       loading = true;
     });
     await Future.delayed(Duration(milliseconds: 20));
-    await RuneEngine.load();
+    await RuneEngine.load(RuneScreen.logs);
 
     setState(() {
       loading = false;
@@ -69,7 +88,7 @@ class _RuneScreenState extends State<RuneScreen> {
     }
 
     await Future.delayed(Duration(milliseconds: 20));
-    await RuneEngine.run();
+    await RuneEngine.run(RuneScreen.logs);
 
     setState(() {
       loading = false;
@@ -88,7 +107,6 @@ class _RuneScreenState extends State<RuneScreen> {
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   Widget build(BuildContext context) {
     print(RuneEngine.manifest);
@@ -116,26 +134,39 @@ class _RuneScreenState extends State<RuneScreen> {
                     width: 16,
                   ),
                   onPressed: () {}),
-              Center(
-                  child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    gradient: LinearGradient(
-                      begin: Alignment.centerRight,
-                      end: Alignment.centerLeft,
-                      colors: [
-                        barneyPurpleColor.withAlpha(150),
-                        indigoBlueColor.withAlpha(150),
-                      ],
+              (RuneScreen.logs.isConnected())
+                  ? AnimatedOpacity(
+                      opacity: _turn ? 0.0 : 1.0,
+                      duration: Duration(milliseconds: heartBeatInterval),
+                      child: Tooltip(
+                          padding: EdgeInsets.all(21),
+                          triggerMode: TooltipTriggerMode.tap,
+                          message:
+                              "Connected to Studio\nNamespace:${Logs.projectID}\nDeviceType:${Logs.getDeviceType()}",
+                          child: Container(
+                              padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+                              child: Icon(Icons.favorite,
+                                  size: 16, color: Colors.red))))
+                  : Center(
+                      child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            begin: Alignment.centerRight,
+                            end: Alignment.centerLeft,
+                            colors: [
+                              barneyPurpleColor.withAlpha(150),
+                              indigoBlueColor.withAlpha(150),
+                            ],
+                          )),
+                      width: 30,
+                      height: 30,
+                      child: IconButton(
+                          icon: Icon(Icons.segment, size: 16),
+                          splashColor: Colors.white,
+                          splashRadius: 21,
+                          onPressed: () {}),
                     )),
-                width: 30,
-                height: 30,
-                child: IconButton(
-                    icon: Icon(Icons.segment, size: 16),
-                    splashColor: Colors.white,
-                    splashRadius: 21,
-                    onPressed: () {}),
-              )),
               Container(
                 width: 10,
               )
@@ -355,5 +386,10 @@ class _RuneScreenState extends State<RuneScreen> {
         },
       ),
     );
+  }
+
+  dispose() {
+    RuneScreen.logs.disconnect();
+    super.dispose();
   }
 }
