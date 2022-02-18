@@ -3,6 +3,7 @@ import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
+import 'package:runic_flutter/utils/error_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
@@ -15,6 +16,7 @@ class URLLoadingScreen extends StatefulWidget {
 }
 
 class _URLLoadingScreenState extends State<URLLoadingScreen> {
+  bool _error = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -25,6 +27,12 @@ class _URLLoadingScreenState extends State<URLLoadingScreen> {
   loadRune() async {
     Logs log = new Logs();
     RuneEngine.runeBytes = await Registry.downloadWASM(RuneEngine.url!, log);
+    if (RuneEngine.runeBytes == null) {
+      setState(() {
+        _error = true;
+      });
+      return;
+    }
     RuneEngine.runeMeta = {
       "name": "/${RuneEngine.url!}".split("/").last,
       "description": "Rune"
@@ -54,6 +62,15 @@ class _URLLoadingScreenState extends State<URLLoadingScreen> {
             )),
           ),
           body: LoadingScreen()),
+      _error
+          ? ErrorScreen(
+              description: "Error fetching and deploying rune",
+              onClose: () {
+                setState(() {
+                  _error = false;
+                });
+              })
+          : Container()
     ]);
   }
 }

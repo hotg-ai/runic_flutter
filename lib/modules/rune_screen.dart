@@ -47,7 +47,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
       beat();
     }
     //if no rune is loaded go back to home screen
-    if (RuneEngine.runeBytes.length == 0) {
+    if (RuneEngine.runeBytes!.length == 0) {
       print("Falling back to home screen");
       Navigator.pushNamed(context, "home");
     } else {

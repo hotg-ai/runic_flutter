@@ -11,6 +11,7 @@ import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_depot.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/rune_screen.dart';
+import 'package:runic_flutter/utils/error_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/utils/navigation_bar_clipper.dart';
 import 'package:runic_flutter/widgets/background.dart';
@@ -27,7 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> searchList = [];
   bool _loading = false;
-
+  bool _error = false;
   String _loadingProgress = "";
   String _loadingDescription = "";
   @override
@@ -225,6 +226,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       RuneScreen.logs = log;
                       RuneEngine.runeBytes = await Registry.downloadWASM(
                           urlTextController.text, log);
+                      if (RuneEngine.runeBytes == null) {
+                        setState(() {
+                          _loading = false;
+                          _error = true;
+                        });
+                        return;
+                      }
                       RuneEngine.runeMeta = {
                         "name": "/${urlTextController.text}".split("/").last,
                         "description": "Fetched Rune"
@@ -364,6 +372,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                         searchList[index]["name"] +
                                         '/rune.rune',
                                     null);
+                                if (RuneEngine.runeBytes == null) {
+                                  setState(() {
+                                    _loading = false;
+                                    _error = true;
+                                  });
+                                  return;
+                                }
                                 Registry.onUpdate =
                                     (int bytesIn, int totalBytes) {
                                   print("Received $bytesIn/$totalBytes");
@@ -372,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _loadingDescription = "";
                                 RuneEngine.runeMeta = searchList[index];
                                 await RuneDepot.addRune(
-                                    RuneEngine.runeBytes, RuneEngine.runeMeta,
+                                    RuneEngine.runeBytes!, RuneEngine.runeMeta,
                                     uuid:
                                         "${searchList[index]["name"]}_${searchList[index]["version"]}");
                                 await Registry.fetchRegistry(force: true);
@@ -470,6 +485,15 @@ class _HomeScreenState extends State<HomeScreen> {
               description: _loadingDescription,
             )
           : Container(),
+      _error
+          ? ErrorScreen(
+              description: "Error fetching and deploying rune",
+              onClose: () {
+                setState(() {
+                  _error = false;
+                });
+              })
+          : Container()
     ]);
   }
 }

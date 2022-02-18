@@ -14,7 +14,7 @@ import 'package:runic_flutter/widgets/capabilities/accel_cap.dart';
 
 class RuneEngine {
   static double executionTime = 0.0;
-  static Uint8List runeBytes = new Uint8List(0);
+  static Uint8List? runeBytes = new Uint8List(0);
   static RuneGraph? runeGraph;
   static Map<String, dynamic> runeMeta = {};
   static Map<String, dynamic> output = {"type": "none", "output": "-"};
@@ -52,13 +52,13 @@ class RuneEngine {
   static load([Logs? log]) async {
     RuneEngine.executionTime = 0.0;
     RuneEngine.output = {"type": "none", "output": "-"};
-    print("RunevmFl.load ${RuneEngine.runeBytes.length}");
+    print("RunevmFl.load ${RuneEngine.runeBytes!.length}");
     //Rune
-    getMeta(RuneEngine.runeBytes);
+    getMeta(RuneEngine.runeBytes!);
     log?.sendTelemetryToSocket({"type": "rune/load/started"});
     int startTime = DateTime.now().millisecondsSinceEpoch;
     try {
-      await RunevmFl.load(RuneEngine.runeBytes);
+      await RunevmFl.load(RuneEngine.runeBytes!);
     } catch (e) {
       int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
       log?.sendTelemetryToSocket({
