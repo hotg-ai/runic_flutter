@@ -49,19 +49,19 @@ class RuneEngine {
     RuneEngine.runeMeta["name"] = runeGraph?.runeName;
   }
 
-  static load() async {
+  static load([Logs? log]) async {
     RuneEngine.executionTime = 0.0;
     RuneEngine.output = {"type": "none", "output": "-"};
     print("RunevmFl.load ${RuneEngine.runeBytes.length}");
     //Rune
     getMeta(RuneEngine.runeBytes);
-    Logs.sendTelemetryToSocket({"type": "rune/load/started"});
+    log?.sendTelemetryToSocket({"type": "rune/load/started"});
     int startTime = DateTime.now().millisecondsSinceEpoch;
     try {
       await RunevmFl.load(RuneEngine.runeBytes);
     } catch (e) {
       int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
-      Logs.sendTelemetryToSocket({
+      log?.sendTelemetryToSocket({
         "type": "rune/load/failed",
         "error": e.toString(),
         "message": e.toString(),
@@ -69,7 +69,7 @@ class RuneEngine {
       });
     }
     int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
-    Logs.sendTelemetryToSocket({
+    log?.sendTelemetryToSocket({
       "type": "rune/load/succeeded",
       "milliseconds": totalTime.toString(),
     });
@@ -106,11 +106,11 @@ class RuneEngine {
         capabilities.add(audioCap);
       }
     }
-    Logs.sendLogs();
+    log?.sendLogs();
     Analytics.addToHistory("${runeMeta["name"]} deployed");
   }
 
-  static Future<Map<String, dynamic>> run() async {
+  static Future<Map<String, dynamic>> run([Logs? log]) async {
     try {
       //RuneEngine.executionTime = 0.0;
       List<int> lengths = [];
@@ -124,20 +124,20 @@ class RuneEngine {
 
       print("Bytes total ${bytes.length}");
       int start = DateTime.now().microsecondsSinceEpoch;
-      Logs.sendTelemetryToSocket({"type": "rune/predict/started"});
+      log?.sendTelemetryToSocket({"type": "rune/predict/started"});
 
       dynamic runeOutput = await RunevmFl.runRune(bytes.toBytes(), lengths);
       int time = DateTime.now().microsecondsSinceEpoch - start;
       if (runeOutput is String) {
         if (runeOutput.toLowerCase() == "error") {
-          Logs.sendTelemetryToSocket({
+          log?.sendTelemetryToSocket({
             "type": "rune/predict/failed",
             "error": "error",
             "message": "error",
             "milliseconds": time.toString(),
           });
         } else {
-          Logs.sendTelemetryToSocket({
+          log?.sendTelemetryToSocket({
             "type": "rune/predict/succeeded",
             "milliseconds": time.toString(),
           });
@@ -313,11 +313,11 @@ class RuneEngine {
           };
         }
       }
-      Logs.sendLogs();
+      log?.sendLogs();
       return RuneEngine.output;
     } catch (e) {
       RuneEngine.output = {"type": "Error", "output": "Error ${e.toString()}"};
-      Logs.sendLogs();
+      log?.sendLogs();
       return RuneEngine.output;
     }
   }

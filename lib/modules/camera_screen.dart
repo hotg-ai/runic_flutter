@@ -98,20 +98,29 @@ class _CameraScreenState extends State<CameraScreen>
       final size = MediaQuery.of(context).size;
       final deviceRatio = size.width / size.height;
 
-      return Transform.scale(
-          scale: 0.8 / deviceRatio,
-          child: Center(
-              child: AspectRatio(
-            aspectRatio: 1 / controller!.value.aspectRatio,
-            child: InkWell(
-                onTap: () {},
-                child: CameraPreview(controller!,
+      return Stack(children: [
+        Center(
+            child: AspectRatio(
+          aspectRatio: 1 / controller!.value.aspectRatio,
+          child: InkWell(
+              onTap: () {},
+              child: CameraPreview(
+                controller!,
+              )),
+        )),
+        Container(
+            child: Center(
+                child: Container(
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
+                    width: size.width > size.height ? size.height : size.width,
+                    height: size.width > size.height ? size.height : size.width,
                     child: RuneEngine.output["type"] == "Objects"
                         ? CustomPaint(
                             painter: ShapePainter(RuneEngine.objects),
                             child: Container())
-                        : Container())),
-          )));
+                        : Container())))
+      ]);
     }
   }
 

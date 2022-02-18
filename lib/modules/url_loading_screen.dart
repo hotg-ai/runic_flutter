@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
@@ -22,7 +23,8 @@ class _URLLoadingScreenState extends State<URLLoadingScreen> {
   }
 
   loadRune() async {
-    RuneEngine.runeBytes = await Registry.downloadWASM(RuneEngine.url!);
+    Logs log = new Logs();
+    RuneEngine.runeBytes = await Registry.downloadWASM(RuneEngine.url!, log);
     RuneEngine.runeMeta = {
       "name": "/${RuneEngine.url!}".split("/").last,
       "description": "Rune"

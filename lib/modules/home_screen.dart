@@ -6,6 +6,7 @@ import 'package:glassmorphism/glassmorphism.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_depot.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
@@ -220,9 +221,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       setState(() {
                         _loading = true;
                       });
-
-                      RuneEngine.runeBytes =
-                          await Registry.downloadWASM(urlTextController.text);
+                      Logs log = new Logs();
+                      RuneScreen.logs = log;
+                      RuneEngine.runeBytes = await Registry.downloadWASM(
+                          urlTextController.text, log);
                       RuneEngine.runeMeta = {
                         "name": "/${urlTextController.text}".split("/").last,
                         "description": "Fetched Rune"
@@ -360,7 +362,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 RuneEngine.runeBytes = await Registry.downloadWASM(
                                     'https://rune-registry.web.app/registry/' +
                                         searchList[index]["name"] +
-                                        '/rune.rune');
+                                        '/rune.rune',
+                                    null);
                                 Registry.onUpdate =
                                     (int bytesIn, int totalBytes) {
                                   print("Received $bytesIn/$totalBytes");

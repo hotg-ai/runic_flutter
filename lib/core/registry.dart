@@ -13,7 +13,7 @@ class Registry {
   static Function onUpdate = (int bytesIn, int totalBytes) {
     //print("Received $bytesIn/$totalBytes");
   };
-  static Future<Uint8List> downloadWASM(String urlString) async {
+  static Future<Uint8List> downloadWASM(String urlString, [Logs? logs]) async {
     final decoded = Uri.decodeFull(urlString);
     List<String> parts = decoded.split("#project_id=");
     print("######## $decoded");
@@ -22,25 +22,25 @@ class Registry {
       print("$parts");
       urlString = parts[0];
       int? projectID = int.tryParse(parts[1]);
-      if (projectID != null) Logs.init(projectID, urlString);
+      if (projectID != null) logs?.init(projectID, urlString);
     } else {
       List<String> parts = urlString.split("&project_id=");
       print("$parts");
       if (parts.length == 2) {
         urlString = parts[0];
         int? projectID = int.tryParse(parts[1]);
-        if (projectID != null) Logs.init(projectID, urlString);
+        if (projectID != null) logs?.init(projectID, urlString);
       }
     }
     final url = Uri.parse(urlString.trim());
     final client = http.Client();
     final request = http.Request('GET', url);
-    Logs.sendTelemetryToSocket({"type": "rune/fetch/started"});
+    logs?.sendTelemetryToSocket({"type": "rune/fetch/started"});
     int startTime = DateTime.now().millisecondsSinceEpoch;
     final response = await client.send(request);
     if (response.statusCode != 200) {
       int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
-      Logs.sendTelemetryToSocket({
+      logs?.sendTelemetryToSocket({
         "type": "rune/fetch/failed",
         "error": response.reasonPhrase,
         "message": response.reasonPhrase,
@@ -58,7 +58,7 @@ class Registry {
     }
     client.close();
     int totalTime = DateTime.now().millisecondsSinceEpoch - startTime;
-    Logs.sendTelemetryToSocket({
+    logs?.sendTelemetryToSocket({
       "type": "rune/fetch/succeeded",
       "milliseconds": totalTime.toString(),
     });

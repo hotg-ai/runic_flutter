@@ -20,6 +20,7 @@ class ImageCapabilityWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return new Column(children: [
       single
           ? Stack(children: [
@@ -198,7 +199,8 @@ class ImageCapabilityWidget extends StatelessWidget {
               margin: EdgeInsets.all(0),
               child: Container(
                 //margin: EdgeInsets.fromLTRB(4, 4, 4, 4),
-                height: cap.thumb == null ? 60 : 260,
+                height: cap.thumb == null ? 60 : size.width - 50,
+                width: size.width - 50,
                 //padding: EdgeInsets.all(3),
                 child: ClipRRect(
                     borderRadius: BorderRadius.circular(16.0),

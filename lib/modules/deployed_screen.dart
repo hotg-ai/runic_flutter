@@ -2,9 +2,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
+import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/registry.dart';
 import 'package:runic_flutter/core/rune_depot.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
+import 'package:runic_flutter/modules/rune_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
 
@@ -199,9 +201,10 @@ class _DeployedScreenState extends State<DeployedScreen> {
                       setState(() {
                         loading = true;
                       });
-
-                      RuneEngine.runeBytes =
-                          await Registry.downloadWASM(urlTextController.text);
+                      Logs log = new Logs();
+                      RuneScreen.logs = log;
+                      RuneEngine.runeBytes = await Registry.downloadWASM(
+                          urlTextController.text, log);
                       RuneEngine.runeMeta = {
                         "name": "/${urlTextController.text}".split("/").last,
                         "description": "Fetched Rune"
