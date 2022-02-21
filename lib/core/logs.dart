@@ -27,10 +27,10 @@ class Logs {
   static String socketIOUrl = "https://dev-socket.hotg.ai";
   static IO.Socket? socket;
   static String? visitorID;
-  static int? projectID = 0;
+  static String? projectID = "0";
   static String? userName;
 
-  init(int newProjectID, String url) async {
+  init(String newProjectID, String url, [env = "prd"]) async {
     IO.cache.clear();
 
     //if (projectID == newProjectID) {
@@ -38,10 +38,10 @@ class Logs {
     //} else {
     projectID = newProjectID;
     socketIOUrl = "https://socket.hotg.ai";
-    if (url.contains("https://dev-")) {
+    if (url.contains("https://dev-") || env == "dev") {
       socketIOUrl = "https://dev-socket.hotg.ai";
     }
-    if (url.contains("https://stg-")) {
+    if (url.contains("https://stg-") || env == "stg") {
       socketIOUrl = "https://stg-socket.hotg.ai";
     }
     //}
@@ -106,7 +106,7 @@ class Logs {
   void disconnect() {
     if (socket != null) {
       if (socket!.connected) {
-        projectID = 0;
+        projectID = "0";
         socket!.disconnect();
         //socket!.close();
         //socket!.dispose();
@@ -117,14 +117,14 @@ class Logs {
 
   bool isConnected() {
     if (socket != null) {
-      if (socket!.connected && projectID! > 0) {
+      if (socket!.connected && projectID! != "0") {
         return true;
       }
     }
     return false;
   }
 
-  heartBeat(int project) {
+  heartBeat(String project) {
     if (socket!.connected && projectID == project) {
       socket!.emit("heartbeat_$projectID", {"deviceId": visitorID});
       new Future.delayed(const Duration(milliseconds: heartBeatInterval), () {
@@ -141,7 +141,8 @@ class Logs {
     if (socket == null) {
       return;
     }
-    if (socket!.connected && projectID! > 0) {
+
+    if (socket!.connected && projectID! != "0") {
       print(
           "project_log_message_$projectID deviceId: $visitorID, method: $level, message: $data}");
       socket!.emit("project_log_message_$projectID",
@@ -178,6 +179,21 @@ class Logs {
               jsonFields["target"],
               jsonFields["message"]
             ];
+            sendToSocket(jsonFields["message"], jsonFields["level"]);
+          }
+        } catch (e) {}
+      }
+
+      if (kIsWeb) {
+        try {
+          Map<dynamic, dynamic> jsonFields = jsonDecode("$log");
+          if (jsonFields.containsKey("message")) {
+            fields = [
+              jsonFields["level"],
+              jsonFields["target"],
+              jsonFields["message"]
+            ];
+            print("jsonFields $jsonFields");
             sendToSocket(jsonFields["message"], jsonFields["level"]);
           }
         } catch (e) {}

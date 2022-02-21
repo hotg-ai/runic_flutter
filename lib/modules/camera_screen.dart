@@ -7,6 +7,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/result_screen.dart';
+import 'package:runic_flutter/modules/rune_screen.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/image_cap.dart';
 import 'package:camera/camera.dart';
@@ -35,12 +36,23 @@ class _CameraScreenState extends State<CameraScreen>
   bool live = false;
   bool loading = false;
   ValueNotifier<bool>? buttonTrigger;
-
+  bool _play = !kIsWeb;
   @override
   void initState() {
     super.initState();
     _ambiguate(WidgetsBinding.instance)?.addObserver(this);
     initCam();
+  }
+
+  isCameraReady() {
+    if (controller == null) {
+      return false;
+    } else {
+      if (!controller!.value.isInitialized) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Display the preview from the camera (or a message if the preview is not available).
@@ -113,8 +125,14 @@ class _CameraScreenState extends State<CameraScreen>
                 child: Container(
                     decoration:
                         BoxDecoration(border: Border.all(color: Colors.grey)),
-                    width: size.width > size.height ? size.height : size.width,
-                    height: size.width > size.height ? size.height : size.width,
+                    width:
+                        size.width > size.height / controller!.value.aspectRatio
+                            ? size.height / controller!.value.aspectRatio
+                            : size.width,
+                    height:
+                        size.width > size.height / controller!.value.aspectRatio
+                            ? size.height / controller!.value.aspectRatio
+                            : size.width,
                     child: RuneEngine.output["type"] == "Objects"
                         ? CustomPaint(
                             painter: ShapePainter(RuneEngine.objects),
@@ -136,19 +154,21 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = controller;
+    if (!kIsWeb) {
+      final CameraController? cameraController = controller;
 
-    // App state changed before we got the chance to initialize.
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
+      // App state changed before we got the chance to initialize.
+      if (cameraController == null || !cameraController.value.isInitialized) {
+        return;
+      }
 
-    if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      onNewCameraSelected(cameraController.description);
+      if (state == AppLifecycleState.inactive) {
+        cameraController.dispose();
+      } else if (state == AppLifecycleState.resumed) {
+        onNewCameraSelected(cameraController.description);
+      }
+      super.didChangeAppLifecycleState(state);
     }
-    super.didChangeAppLifecycleState(state);
   }
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
@@ -222,11 +242,13 @@ class _CameraScreenState extends State<CameraScreen>
 
     try {
       cameras = await availableCameras();
-      print(cameras);
+      if (cameras.length >= 2 && kIsWeb) {
+        camera = 1;
+      }
     } on CameraException catch (e) {
       print("${e.code}, ${e.description}");
     }
-
+    //await Future.delayed(const Duration(milliseconds: 250));
     onNewCameraSelected(cameras[camera]);
   }
 
@@ -235,6 +257,11 @@ class _CameraScreenState extends State<CameraScreen>
     if (camera == cameras.length) {
       camera = 0;
     }
+    setState(() {
+      _play = false;
+      live = false;
+    });
+
     onNewCameraSelected(cameras[camera]);
   }
 
@@ -257,7 +284,7 @@ class _CameraScreenState extends State<CameraScreen>
       widget.cap.raw = bytes;
     }
 
-    await RuneEngine.run();
+    await RuneEngine.run(RuneScreen.logs);
     loading = false;
     setState(() {});
     if (RuneEngine.output["type"] != "Image" && controller != null && live) {
@@ -280,7 +307,7 @@ class _CameraScreenState extends State<CameraScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black,
       body: Container(
           padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
           child: Stack(children: [
@@ -293,7 +320,7 @@ class _CameraScreenState extends State<CameraScreen>
             showBackButton
                 ? Positioned(
                     left: 21,
-                    top: 42,
+                    top: 30,
                     height: 42,
                     width: 42,
                     child: IconButton(
@@ -305,11 +332,12 @@ class _CameraScreenState extends State<CameraScreen>
 
                           Navigator.pop(context);
                         },
-                        icon: Icon(Icons.arrow_back_ios, color: Colors.white)))
+                        icon: Icon(Icons.arrow_back_ios,
+                            color: const Color(0xffff00e5))))
                 : Container(),
-            showBackButton
+            showBackButton && _play
                 ? Positioned(
-                    bottom: 120,
+                    bottom: 40,
                     height: 84,
                     left: 50,
                     right: 50,
@@ -323,9 +351,9 @@ class _CameraScreenState extends State<CameraScreen>
                               color: darkBlueBlue.withAlpha(100),
                             ))))
                 : Container(),
-            showBackButton
+            showBackButton && _play
                 ? Positioned(
-                    bottom: 120,
+                    bottom: 40,
                     height: 84,
                     left: 50,
                     right: 50,
@@ -385,44 +413,71 @@ class _CameraScreenState extends State<CameraScreen>
                       )))
                     ]))
                 : Container(),
-            //results
-            showBackButton && RuneEngine.output["type"] == "String"
-                ? Positioned(
-                    top: 100,
-                    height: 82,
-                    left: 0,
-                    right: 0,
-                    child: Blur(
-                        blur: 10,
-                        blurColor: Colors.white24,
-                        colorOpacity: 0.3,
+            _play || !isCameraReady()
+                ? Container()
+                : Center(
+                    child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _play = true;
+                          });
+                          if (RuneEngine.output["type"] != "Image") {
+                            live = !live;
+                            if (live) {
+                              run();
+                            }
+                          } else {
+                            live = false;
+                            run();
+                          }
+                        },
                         child: Container(
-                          color: darkBlueBlue.withAlpha(0),
-                        )))
-                : Container(),
-            showBackButton && RuneEngine.output["type"] == "String"
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(33)),
+                                border: Border.all(
+                                  width: 1,
+                                  color: const Color(0xffff00e5),
+                                )),
+                            child: Container(
+                                width: 36,
+                                height: 36,
+                                child: Icon(
+                                  live ? Icons.stop : Icons.play_arrow,
+                                  color: darkGreyBlue,
+                                  size: 21,
+                                ),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(14)),
+                                    color: const Color(0xffff00e5)))))),
+            //results
+            showBackButton && RuneEngine.output["type"] == "String" && _play
                 ? Positioned(
-                    top: 100,
-                    height: 82,
+                    top: 66,
+                    height: 64,
                     left: 0,
                     right: 0,
-                    child: Row(children: [
-                      Expanded(
-                          child: Text("${RuneEngine.output["output"]}",
-                              //maxLines: 2,
-                              overflow: TextOverflow.clip,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                              )))
-                    ]))
+                    child: Container(
+                        color: Colors.white.withAlpha(50),
+                        child: Row(children: [
+                          Expanded(
+                              child: Text("${RuneEngine.output["output"]}",
+                                  //maxLines: 2,
+                                  overflow: TextOverflow.clip,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  )))
+                        ])))
                 : Container(),
             showBackButton && (loading || RuneEngine.executionTime > 0.0)
                 ? Positioned(
                     bottom: 20,
-                    height: 120,
+                    height: 20,
                     left: 0,
                     right: 0,
                     child: loading &&

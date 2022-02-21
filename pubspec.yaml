@@ -24,10 +24,11 @@ dependencies:
   flutter:
     sdk: flutter
   blur: ^3.0.0
+  permission_handler: ^8.2.6
   glassmorphism: ^2.0.1
   cupertino_icons: ^1.0.2
   http: ^0.13.3
-  camera: ^0.9.4+8
+  camera: ^0.9.4+14
   share_plus: ^3.0.2
   image: ^3.0.5
   socket_io_client: ^2.0.0-beta.4-nullsafety.0

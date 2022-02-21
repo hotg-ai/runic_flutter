@@ -1,6 +1,8 @@
 
 let output;
 let logs = [];
+var manifestGlobal = {"manifest":[]};
+
 const capabilitiesDefinition = {
     1: "RandCapability",
     2: "AudioCapability",
@@ -11,13 +13,10 @@ const capabilitiesDefinition = {
 
 class RuneCapability {
     parameters = {};
-    manifest;
     data;
     cap_id = 0;
     type=-1;
-    constructor(cap_id,manifest,data,type) {
-
-        this.manifest = manifest;
+    constructor(cap_id,data,type) {
         this.cap_id = cap_id;
         this.data = data;
         this.type= type;
@@ -27,10 +26,14 @@ class RuneCapability {
     }
     setParameter(key, value) {
         this.parameters[key] = value;
-        if(this.manifest.length<=this.cap_id) {
-            this.manifest[this.cap_id]={"type":capabilitiesDefinition[this.type]};
+        console.log("setParam",manifestGlobal["manifest"],key, value);
+        if(manifestGlobal["manifest"].length<=this.cap_id) {
+            
+            manifestGlobal["manifest"][this.cap_id]={"type":capabilitiesDefinition[this.type]};
+            
         }
-        this.manifest[this.cap_id][key] = value;
+        manifestGlobal["manifest"][this.cap_id][key] = value;
+        console.log("updateing manifest ",manifestGlobal["manifest"]);
     }
  }
 
@@ -46,7 +49,6 @@ class Bridge {
     runtime;
     data;
     cap_count=0;
-    manifest = [];
     log = [];
     constructor() {
         this.data = [{ "inputs": [],  "outputs": [] }];
@@ -74,9 +76,11 @@ class Bridge {
     async load(bytes) {
         logs=[];
         this.cap_count = 0;
-        this.manifest = [];
+        console.log("Resetting manifest", manifestGlobal["manifest"]);
+        manifestGlobal["manifest"] = [];
+        console.log("Resetting manifest", manifestGlobal["manifest"]);
         const imports = {
-            createCapability: (type) => new RuneCapability(this.cap_count++,this.manifest,this.data,type),
+            createCapability: (type) => new RuneCapability(this.cap_count++,this.data,type),
             createOutput: () => new SerialOutput(),
             createModel: (mime, model_data) => { 
                 if(mime=="application/tfjs-model") {
@@ -89,11 +93,12 @@ class Bridge {
             },
             log: (log) => { logs.push(JSON.stringify(log)); },
         };
+        console.log("Returning manifest",manifestGlobal["manifest"]);
         var view = new Uint8Array(bytes);
         await window.rune.tf.setBackend('wasm');
         this.runtime=await window.rune.Runtime.load(view.buffer,imports);
- 
-        return JSON.stringify(this.manifest);
+        console.log("Returning manifest",manifestGlobal["manifest"]);
+        return JSON.stringify(manifestGlobal["manifest"]);
     }
 
     async getLogs() {

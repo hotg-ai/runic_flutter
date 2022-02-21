@@ -8,4 +8,10 @@ class RandCap extends RawCap {
   Uint8List? raw = new Uint8List(0);
   @override
   int type = CapabilitiesIds["RandCapability"]!;
+
+  @override
+  prepData() {
+    super.prepData();
+    this.raw = new Uint8List(parameters["length"]);
+  }
 }

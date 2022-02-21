@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:blur/blur.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/config/theme.dart';
@@ -31,42 +32,33 @@ class MainMenu extends StatelessWidget {
         bottom: 0,
         left: 0,
         right: 0,
-        height: 110,
+        height: !kIsWeb ? 110 : 80,
         child: Stack(children: <Widget>[
           Container(),
-          Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              top: 32,
-              child: Blur(
-                  blur: 3.5,
-                  blurColor: darkBlueBlue,
-                  colorOpacity: 0.0,
-                  child: Container())),
           Material(
               color: Colors.transparent,
               child: config["hide"]!
                   ? Container()
                   : ClipPath(
-                      clipper: NavigationBarClipper(),
+                      clipper: kIsWeb ? null : NavigationBarClipper(),
                       child: Container(
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                              darkGreyBlue,
-                              darkBlueBlue,
-                              darkGreyBlue80,
-                            ])),
                         child: Stack(children: <Widget>[
                           Positioned(
                               bottom: 0,
                               left: 0,
                               right: 0,
-                              top: 60,
-                              child: Container()),
+                              top: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                      darkGreyBlue,
+                                      darkBlueBlue,
+                                      darkGreyBlue80,
+                                    ])),
+                              )),
                           Positioned(
                               bottom: 28,
                               left: 1 * MediaQuery.of(context).size.width / 6 -

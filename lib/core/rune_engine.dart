@@ -75,10 +75,9 @@ class RuneEngine {
     });
     manifest = await RunevmFl.manifest;
     capabilities = [];
-    print(manifest);
 
     for (dynamic cap in manifest) {
-      print(cap);
+      print("cap:$cap");
       if (cap["type"] == "ImageCapability") {
         ImageCap imageCap = new ImageCap();
         imageCap.parameters = cap;
@@ -111,6 +110,7 @@ class RuneEngine {
   }
 
   static Future<Map<String, dynamic>> run([Logs? log]) async {
+    print(log);
     try {
       //RuneEngine.executionTime = 0.0;
       List<int> lengths = [];
@@ -121,13 +121,12 @@ class RuneEngine {
         print("Bytes added ${cap.raw!.length}");
         bytes.add(cap.raw!);
       }
-
       print("Bytes total ${bytes.length}");
-      int start = DateTime.now().microsecondsSinceEpoch;
+      int start = DateTime.now().millisecondsSinceEpoch;
       log?.sendTelemetryToSocket({"type": "rune/predict/started"});
 
       dynamic runeOutput = await RunevmFl.runRune(bytes.toBytes(), lengths);
-      int time = DateTime.now().microsecondsSinceEpoch - start;
+      int time = DateTime.now().millisecondsSinceEpoch - start;
       if (runeOutput is String) {
         if (runeOutput.toLowerCase() == "error") {
           log?.sendTelemetryToSocket({
@@ -144,8 +143,7 @@ class RuneEngine {
         }
       } else {}
 
-      executionTime = time * 0.001;
-      print("output generated");
+      executionTime = time * 1.0;
       Analytics.addToHistory(
           "${runeMeta["name"]} executed in ${executionTime.round()} ms");
 

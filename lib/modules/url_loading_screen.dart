@@ -1,3 +1,5 @@
+import 'package:blur/blur.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/logs.dart';
@@ -7,6 +9,7 @@ import 'package:runic_flutter/utils/error_screen.dart';
 import 'package:runic_flutter/utils/loading_screen.dart';
 import 'package:runic_flutter/widgets/background.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class URLLoadingScreen extends StatefulWidget {
   URLLoadingScreen({Key? key}) : super(key: key);
@@ -17,6 +20,7 @@ class URLLoadingScreen extends StatefulWidget {
 
 class _URLLoadingScreenState extends State<URLLoadingScreen> {
   bool _error = false;
+  bool loaded = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -37,10 +41,16 @@ class _URLLoadingScreenState extends State<URLLoadingScreen> {
       "name": "/${RuneEngine.url!}".split("/").last,
       "description": "Rune"
     };
+    loaded = true;
     Navigator.pushNamed(
       context,
       'rune',
-    );
+    ).then((value) {
+      Navigator.pushNamed(
+        context,
+        'home',
+      );
+    });
   }
 
   @override
