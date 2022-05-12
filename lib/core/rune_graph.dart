@@ -135,16 +135,16 @@ class RuneGraph {
     }
     dynamic tensorObject = parse(json, "tensors");
     if (tensorObject != null) {
+      print(tensorObject);
       for (String key in tensorObject.keys) {
         Tensor tensor = new Tensor();
         tensor.name = key;
-        tensor.elementType = parse(tensorObject[key], "element_type");
+        tensor.elementType =
+            parse(tensorObject[key], "element_type").toString();
         tensor.dimensions = parse(tensorObject[key], "dimensions");
         tensors[key] = tensor;
       }
     }
-    print(
-        "$runeName >>> $capabilities >>> $procBlocks >>> $outputs >>> $tensors");
   }
 
   dynamic parse(dynamic data, String key) {

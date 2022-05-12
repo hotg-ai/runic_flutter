@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -219,9 +220,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       maxWidth: 36,
                                       minWidth: 36,
                                       maxHeight: 36),
-                                  suffixIcon: Container(
+                                  suffixIcon: IconButton(
+                                      onPressed: () {
+                                        Clipboard.getData(Clipboard.kTextPlain)
+                                            .then((value) {
+                                          if (value != null) {
+                                            if (value.text != null) {
+                                              urlTextController.text =
+                                                  value.text!;
+                                              setState(() {});
+                                            }
+                                          }
+                                          //value is clipbarod data
+                                        });
+                                      },
                                       padding: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                                      child: Image.asset(
+                                      icon: Image.asset(
                                         "assets/images/icons/paste.png",
                                         height: 14,
                                       )),

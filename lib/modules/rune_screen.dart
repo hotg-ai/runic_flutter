@@ -36,7 +36,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
   bool showRest = true;
   bool loading = false;
   bool _error = false;
-  bool showed = false;
+  static bool showed = false;
 
   refresh() {
     setState(() {});
@@ -117,7 +117,9 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    print(RuneEngine.manifest);
+    if (_error && kIsWeb) {
+      //showDownload();
+    }
     return Stack(children: [
       Background(),
       Scaffold(
@@ -238,6 +240,10 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
                         }
                         if (RuneEngine.capabilities[index].type ==
                             CapabilitiesIds["AudioCapability"]) {
+                          if (kIsWeb) {
+                            showDownload();
+                          }
+
                           return Container(
                               padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                               child: AudioCapabilityWidget(
@@ -348,8 +354,18 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
 
                       }
                       if (index == RuneEngine.manifest.length + 2) {
-                        return runTimeLogs();
+                        return Container(
+                            width: double.infinity,
+                            child:
+                                Row(mainAxisSize: MainAxisSize.max, children: [
+                              Expanded(child: runTimeLogs()),
+                              Container(
+                                width: 20,
+                              ),
+                              Expanded(child: feedBackWidget())
+                            ]));
                       }
+
                       final isWebMobile = kIsWeb &&
                           (defaultTargetPlatform == TargetPlatform.iOS ||
                               defaultTargetPlatform == TargetPlatform.android);
@@ -362,7 +378,9 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
           ])),
       _error
           ? ErrorScreen(
-              description: RuneEngine.output["output"],
+              description: kIsWeb
+                  ? "${RuneEngine.output["output"]}, we recommend trying it on our native mobile app"
+                  : RuneEngine.output["output"],
               onClose: () {
                 setState(() {
                   _error = false;
@@ -370,6 +388,42 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
               })
           : Container()
     ]);
+  }
+
+  Widget feedBackWidget() {
+    return Container(
+      height: 42,
+      margin: EdgeInsets.only(top: 11, bottom: 11),
+      decoration: new BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 6,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+          borderRadius: BorderRadius.circular(20.5),
+          gradient: LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: [
+              charcoalGrey.withAlpha(125),
+              barneyPurpleColor.withAlpha(50),
+              indigoBlueColor.withAlpha(125),
+            ],
+          )),
+      child: RawMaterialButton(
+        elevation: 4.0,
+        child: new Text(
+          'Send Feedback',
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+        onPressed: () {
+          showFeedBack();
+        },
+      ),
+    );
   }
 
   Widget runTimeLogs() {
@@ -398,7 +452,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
       child: RawMaterialButton(
         elevation: 4.0,
         child: new Text(
-          'Show Rune runtime logs',
+          'Show Logs',
           style: TextStyle(fontSize: 16, color: Colors.white),
         ),
         onPressed: () {
@@ -412,6 +466,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
   }
 
   void showDownload() async {
+    await Future.delayed(const Duration(milliseconds: 100));
     if (!showed &&
         kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.iOS ||
@@ -419,7 +474,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
             defaultTargetPlatform == TargetPlatform.macOS)) {
       SnackBar snackBar = SnackBar(
           elevation: 0,
-          duration: Duration(seconds: 100),
+          duration: Duration(seconds: 10),
           backgroundColor: Colors.transparent,
           content: Container(
               height: 180,
@@ -486,6 +541,165 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       showed = true;
     }
+  }
+
+  void showFeedBack() async {
+    //feedback
+    bool? outputs = true;
+    bool? inputs = true;
+    bool? correct = false;
+    String? feedBack = "";
+    final TextEditingController controller = new TextEditingController();
+    SnackBar snackBar = SnackBar(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        duration: Duration(seconds: 500),
+        backgroundColor: Colors.transparent,
+        content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setStateFeedback) {
+          //feedback
+
+          return Container(
+              height: MediaQuery.of(context).size.height - 50,
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: Container(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                  child: Stack(children: [
+                    Container(
+                      width: double.infinity,
+                    ),
+                    Blur(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      child: Container(
+                        width: double.infinity,
+                      ),
+                      colorOpacity: 0.2,
+                    ),
+                    ListView(
+                      children: [
+                        ListTile(
+                          onTap: () async {},
+                          title: Text(
+                            "Feedback",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        ListTile(
+                          title: Container(
+                              height: 120,
+                              padding: EdgeInsets.fromLTRB(0, 0, 55, 0),
+                              child: TextField(
+                                expands: true,
+                                style: TextStyle(color: Colors.white),
+                                onChanged: (String text) {
+                                  feedBack = text;
+                                },
+                                controller: controller,
+                                //keyboardType: TextInputType.,
+                                maxLines: null,
+                              )),
+                        ),
+                        CheckboxListTile(
+                          dense: true,
+                          value: inputs,
+                          onChanged: (bool? checked) {
+                            setStateFeedback(
+                              () {
+                                inputs = checked;
+                              },
+                            );
+                          },
+                          title: Text(
+                              "Send Input data (${RuneEngine.inputLength} bytes)",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        CheckboxListTile(
+                          dense: true,
+                          value: outputs,
+                          onChanged: (bool? checked) {
+                            setStateFeedback(
+                              () {
+                                outputs = checked;
+                              },
+                            );
+                          },
+                          title: Text(
+                            "Send Output data (${RuneEngine.output.toString().length} bytes)",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        CheckboxListTile(
+                          dense: true,
+                          value: correct,
+                          onChanged: (bool? checked) {
+                            setStateFeedback(
+                              () {
+                                correct = checked;
+                              },
+                            );
+                          },
+                          title: Text("Correct output",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        Container(
+                          height: 42,
+                          margin: EdgeInsets.only(
+                              top: 11, bottom: 11, left: 11, right: 11),
+                          decoration: new BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  spreadRadius: 0,
+                                  blurRadius: 6,
+                                  offset: Offset(
+                                      0, 3), // changes position of shadow
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(20.5),
+                              gradient: LinearGradient(
+                                begin: Alignment.centerRight,
+                                end: Alignment.centerLeft,
+                                colors: [
+                                  charcoalGrey.withAlpha(200),
+                                  barneyPurpleColor.withAlpha(200),
+                                  indigoBlueColor.withAlpha(200),
+                                ],
+                              )),
+                          child: RawMaterialButton(
+                            elevation: 4.0,
+                            child: new Text(
+                              'Send Feedback',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white),
+                            ),
+                            onPressed: () {
+                              _scaffoldKey.currentState!.hideCurrentSnackBar();
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                    Positioned(
+                        right: -0,
+                        top: -0,
+                        width: 42,
+                        height: 42,
+                        child: IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              _scaffoldKey.currentState!.hideCurrentSnackBar();
+                            })),
+                  ])));
+        }));
+    _scaffoldKey.currentState!.showSnackBar(snackBar);
   }
 
   @override

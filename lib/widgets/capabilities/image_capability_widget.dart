@@ -1,9 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:runic_flutter/config/theme.dart';
+import 'package:runic_flutter/core/permissions.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
 import 'package:runic_flutter/modules/camera_screen.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
@@ -144,6 +147,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                     height: 18,
                   ),
                   onPressed: () async {
+                    bool perm = await Permissions.requestPhotos();
                     final ImagePicker _picker = ImagePicker();
                     final XFile? image =
                         await _picker.pickImage(source: ImageSource.gallery);
@@ -184,6 +188,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                     height: 21,
                   ),
                   onPressed: () async {
+                    bool perm = await Permissions.requestPhotos();
                     final ImagePicker _picker = ImagePicker();
                     final XFile? image =
                         await _picker.pickImage(source: ImageSource.gallery);
@@ -312,6 +317,8 @@ class ImageCapabilityWidget extends StatelessWidget {
                                         width: 80,
                                       ),
                                       onPressed: () async {
+                                        bool perm =
+                                            await Permissions.requestPhotos();
                                         final ImagePicker _picker =
                                             ImagePicker();
                                         final XFile? image =

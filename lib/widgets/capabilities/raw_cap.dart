@@ -56,6 +56,9 @@ class RawCap {
   }
 
   prepData() {
+    if (!parameters.containsKey("length")) {
+      parameters["length"] = 100;
+    }
     if (type == CapabilitiesIds["RawCapability"]) {
       final bytesBuilder = BytesBuilder();
       if (raw!.length > parameters["length"]) {
@@ -67,6 +70,7 @@ class RawCap {
         }
       }
       raw = bytesBuilder.toBytes();
+      print(raw);
     }
   }
 }

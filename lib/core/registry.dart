@@ -55,6 +55,11 @@ class Registry {
           "message": response.reasonPhrase,
           "milliseconds": totalTime.toString(),
         });
+        return null;
+      }
+
+      if (response.contentLength! < 10000) {
+        return null;
       }
       if (response.contentLength! > 50000000) {
         return await response.stream.toBytes();

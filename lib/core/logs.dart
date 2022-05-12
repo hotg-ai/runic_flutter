@@ -77,7 +77,7 @@ class Logs {
     socket!
         .onConnectTimeout((data) => {print("SocketIO ConnectTimeout  $data")});
     socket!.on('event', (data) {
-      print("DATA SEND>>>>>>>>>>>$data");
+      //print("DATA SEND>>>>>>>>>>>$data");
     });
     socket!.onDisconnect((_) => print('disconnect'));
     socket!.on('fromServer', (_) => print(_));
@@ -89,9 +89,7 @@ class Logs {
           "name": userName,
           "type": getDeviceType()
         };
-        print("##### registering device on $projectID $deviceInfo");
-        print("##### registering device on $projectID $deviceInfo");
-        print("##### registering device on $projectID $deviceInfo");
+
         socket!.emit("register_device_$projectID", deviceInfo);
         print("Connected to server");
         print(deviceInfo);

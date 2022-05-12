@@ -1,0 +1,34 @@
+{
+  "name": "ai_barcode",
+  "version": "0.0.1",
+  "summary": "Android and IOS recognize the &quot;one-dimensional bar code&quot; and &quot;two-dimensional bar code&quot;, and support the Scanner embedded in Flutter pages to meet changing business needs",
+  "description": "Android and IOS recognize the &quot;one-dimensional bar code&quot; and &quot;two-dimensional bar code&quot;, and support the Scanner embedded in Flutter pages to meet changing business needs",
+  "homepage": "http://example.com",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Your Company": "email@example.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "Flutter": [
+
+    ],
+    "MTBBarcodeScanner": [
+
+    ]
+  },
+  "platforms": {
+    "ios": "9.0"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES",
+    "VALID_ARCHS[sdk=iphonesimulator*]": "x86_64"
+  },
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
+}

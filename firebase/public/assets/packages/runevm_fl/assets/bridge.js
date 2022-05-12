@@ -1,8 +1,6 @@
 
 let output;
 let logs = [];
-var manifestGlobal = {"manifest":[]};
-
 const capabilitiesDefinition = {
     1: "RandCapability",
     2: "AudioCapability",
@@ -13,10 +11,13 @@ const capabilitiesDefinition = {
 
 class RuneCapability {
     parameters = {};
+    manifest;
     data;
     cap_id = 0;
     type=-1;
-    constructor(cap_id,data,type) {
+    constructor(cap_id,manifest,data,type) {
+        console.log("cap",cap_id,manifest,data,type);
+        this.manifest = manifest;
         this.cap_id = cap_id;
         this.data = data;
         this.type= type;
@@ -26,14 +27,14 @@ class RuneCapability {
     }
     setParameter(key, value) {
         this.parameters[key] = value;
-        console.log("setParam",manifestGlobal["manifest"],key, value);
-        if(manifestGlobal["manifest"].length<=this.cap_id) {
+        
+        if(this.manifest.length<=this.cap_id) {
             
-            manifestGlobal["manifest"][this.cap_id]={"type":capabilitiesDefinition[this.type]};
+            this.manifest[this.cap_id]={"type":capabilitiesDefinition[this.type]};
             
         }
-        manifestGlobal["manifest"][this.cap_id][key] = value;
-        console.log("updateing manifest ",manifestGlobal["manifest"]);
+        this.manifest[this.cap_id][key] = value;
+        console.log(this.manifest)
     }
  }
 
@@ -49,12 +50,15 @@ class Bridge {
     runtime;
     data;
     cap_count=0;
+    manifest = [];
     log = [];
     constructor() {
         this.data = [{ "inputs": [],  "outputs": [] }];
         console.log("bridge loaded");
     }
     
+
+
     async call(bytes,lengths) {
      
         logs=[]; 
@@ -76,11 +80,9 @@ class Bridge {
     async load(bytes) {
         logs=[];
         this.cap_count = 0;
-        console.log("Resetting manifest", manifestGlobal["manifest"]);
-        manifestGlobal["manifest"] = [];
-        console.log("Resetting manifest", manifestGlobal["manifest"]);
+        this.manifest = [];
         const imports = {
-            createCapability: (type) => new RuneCapability(this.cap_count++,this.data,type),
+            createCapability: (type) => new RuneCapability(this.cap_count++,this.manifest,this.data,type),
             createOutput: () => new SerialOutput(),
             createModel: (mime, model_data) => { 
                 if(mime=="application/tfjs-model") {
@@ -93,13 +95,14 @@ class Bridge {
             },
             log: (log) => { logs.push(JSON.stringify(log)); },
         };
-        console.log("Returning manifest",manifestGlobal["manifest"]);
         var view = new Uint8Array(bytes);
         await window.rune.tf.setBackend('wasm');
         this.runtime=await window.rune.Runtime.load(view.buffer,imports);
-        console.log("Returning manifest",manifestGlobal["manifest"]);
-        return JSON.stringify(manifestGlobal["manifest"]);
+ 
+        return JSON.stringify(this.manifest);
     }
+   
+
 
     async getLogs() {
         return logs;
@@ -107,3 +110,12 @@ class Bridge {
 }
 
 bridge = new Bridge();
+/*
+    //helpers
+    //async decodeAAC(bytes) {
+        //let audioCtx =  new AudioContext();
+        //let view = new Uint8Array(bytes);
+        //let audioBuffer = await audioCtx.decodeAudioData(view.buffer);
+        //return 0;
+    //}
+*/

@@ -33,6 +33,9 @@ class RuneEngine {
   static bool isYoloModel() {
     if (runeGraph != null) {
       if (runeGraph!.parsed) {
+        if (runeGraph!.runeName.toLowerCase().contains("yolo")) {
+          return true;
+        }
         if (runeGraph!.json.containsKey("models")) {
           if (runeGraph!.json["models"].containsKey("yolo")) {
             return true;
@@ -52,7 +55,6 @@ class RuneEngine {
   static load([Logs? log]) async {
     RuneEngine.executionTime = 0.0;
     RuneEngine.output = {"type": "none", "output": "-"};
-    print("RunevmFl.load ${RuneEngine.runeBytes!.length}");
     //Rune
     getMeta(RuneEngine.runeBytes!);
     log?.sendTelemetryToSocket({"type": "rune/load/started"});
@@ -75,9 +77,8 @@ class RuneEngine {
     });
     manifest = await RunevmFl.manifest;
     capabilities = [];
-
+    print(">>>Manifest: ${manifest}");
     for (dynamic cap in manifest) {
-      print("cap:$cap");
       if (cap["type"] == "ImageCapability") {
         ImageCap imageCap = new ImageCap();
         imageCap.parameters = cap;
@@ -109,6 +110,8 @@ class RuneEngine {
     Analytics.addToHistory("${runeMeta["name"]} deployed");
   }
 
+  static int inputLength = 0;
+  static int outputLength = 0;
   static Future<Map<String, dynamic>> run([Logs? log]) async {
     print(log);
     try {
@@ -118,10 +121,9 @@ class RuneEngine {
       for (RawCap cap in capabilities) {
         cap.prepData();
         lengths.add(cap.raw!.length);
-        print("Bytes added ${cap.raw!.length}");
         bytes.add(cap.raw!);
       }
-      print("Bytes total ${bytes.length}");
+      inputLength = bytes.length;
       int start = DateTime.now().millisecondsSinceEpoch;
       log?.sendTelemetryToSocket({"type": "rune/predict/started"});
 
@@ -235,6 +237,7 @@ class RuneEngine {
       ];
 
       if (runeOutput is String) {
+        outputLength = runeOutput.length;
         RuneEngine.output = {"type": "String", "output": runeOutput};
         if (RuneEngine.output["type"] == "String") {
           dynamic out = {};
@@ -288,8 +291,8 @@ class RuneEngine {
           }
         }
       } else if (runeOutput is List) {
+        outputLength = runeOutput.length;
         if (isYoloModel()) {
-          print("isYoloModel");
           RuneEngine.objects = [];
           for (int i = 0; i < runeOutput.length; i += 6) {
             double confidence = runeOutput[i + 4];
