@@ -460,8 +460,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _loading = true;
                               });
                               if (searchList[index]["cached"]) {
-                                RuneEngine.runeBytes = (await RuneDepot.getRune(
-                                    "${searchList[index]["name"]}_${searchList[index]["version"]}"))!;
+                                try {
+                                  RuneEngine.runeBytes = (await RuneDepot.getRune(
+                                      "${searchList[index]["name"]}_${searchList[index]["version"]}"))!;
+                                } catch (e) {
+                                  setState(() {
+                                    _loading = false;
+                                    return;
+                                  });
+                                }
+
                                 RuneEngine.runeMeta = searchList[index];
                               } else {
                                 Registry.onUpdate =

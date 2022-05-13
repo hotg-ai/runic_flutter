@@ -158,7 +158,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                     List<Uint8List> data = ImageUtils.convertImage(
                         await image!.readAsBytes(), cap.parameters);
                     cap.thumb = data[1];
-                    cap.raw = data[0];
+                    cap.inputTensor.bytes = data[0];
                     cap.loading = false;
                     notifyParent();
                   },
@@ -200,7 +200,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                         await image!.readAsBytes(), cap.parameters);
 
                     cap.thumb = data[1];
-                    cap.raw = data[0];
+                    cap.inputTensor.bytes = data[0];
                     cap.loading = false;
                     notifyParent();
                   },
@@ -329,7 +329,7 @@ class ImageCapabilityWidget extends StatelessWidget {
                                                 await image!.readAsBytes(),
                                                 cap.parameters);
                                         cap.thumb = data[1];
-                                        cap.raw = data[0];
+                                        cap.inputTensor.bytes = data[0];
                                         notifyParent();
                                       },
                                     ),

@@ -275,13 +275,13 @@ class _CameraScreenState extends State<CameraScreen>
       List<Uint8List> data =
           ImageUtils.convertImage(rawImage, widget.cap.parameters);
       widget.cap.thumb = data[1];
-      widget.cap.raw = data[0];
+      widget.cap.inputTensor.bytes = data[0];
     } else {
       List<Uint8List> data = ImageUtils.processCameraImage(
           currentImage!, widget.cap.parameters, _cameraDescription!);
       widget.cap.thumb = data[1];
       Uint8List bytes = data[0];
-      widget.cap.raw = bytes;
+      widget.cap.inputTensor.bytes = bytes;
     }
 
     await RuneEngine.run(RuneScreen.logs);

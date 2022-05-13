@@ -77,10 +77,22 @@ class RuneEngine {
     });
     manifest = await RunevmFl.manifest;
     capabilities = [];
-    print(">>>Manifest: ${manifest}");
     for (dynamic cap in manifest) {
       if (cap["type"] == "ImageCapability") {
         ImageCap imageCap = new ImageCap();
+        if (cap.containsKey("height") &&
+            cap.containsKey("width") &&
+            cap.containsKey("pixel_format")) {
+          //set dimensions;
+          imageCap.inputTensor.dimensions = [
+            cap["width"],
+            cap["height"],
+            cap["pixel_format"] == 2 ? 1 : 3
+          ];
+        } else {
+          throw Exception("No valid dimesnsions for input generated");
+        }
+        imageCap.inputTensor.id = cap.containsKey("id") ? cap["id"] : 1;
         imageCap.parameters = cap;
         capabilities.add(imageCap);
       } else if (cap["type"] == "RawCapability") {
@@ -113,21 +125,19 @@ class RuneEngine {
   static int inputLength = 0;
   static int outputLength = 0;
   static Future<Map<String, dynamic>> run([Logs? log]) async {
-    print(log);
     try {
       //RuneEngine.executionTime = 0.0;
       List<int> lengths = [];
       var bytes = BytesBuilder();
       for (RawCap cap in capabilities) {
         cap.prepData();
-        lengths.add(cap.raw!.length);
-        bytes.add(cap.raw!);
+        await RunevmFl.addInputTensor(cap.inputTensor);
       }
       inputLength = bytes.length;
       int start = DateTime.now().millisecondsSinceEpoch;
       log?.sendTelemetryToSocket({"type": "rune/predict/started"});
 
-      dynamic runeOutput = await RunevmFl.runRune(bytes.toBytes(), lengths);
+      dynamic runeOutput = await RunevmFl.runRune();
       int time = DateTime.now().millisecondsSinceEpoch - start;
       if (runeOutput is String) {
         if (runeOutput.toLowerCase() == "error") {
@@ -235,7 +245,7 @@ class RuneEngine {
         'hair drier',
         'toothbrush'
       ];
-
+      print(runeOutput.length);
       if (runeOutput is String) {
         outputLength = runeOutput.length;
         RuneEngine.output = {"type": "String", "output": runeOutput};
@@ -246,15 +256,39 @@ class RuneEngine {
           } else {
             out = json.decode(runeOutput);
           }
+
           if (out is List) {
+            if (out.length == 1) {
+              //new bindings
+
+              if (out[0].containsKey("output") && out[0]["element_type"] == 6) {
+                if (out[0]["output"].length > 5000) {
+                  RuneEngine.output["type"] = "Image";
+                  RuneEngine.output["output"] =
+                      ImageUtils.bytesRGBtoPNG(out[0]["output"]);
+                  log?.sendLogs();
+                  return RuneEngine.output;
+                }
+              }
+              if (out[0].containsKey("output") &&
+                  out[0]["element_type"] == "UTF8") {
+                RuneEngine.output["type"] = "String";
+                RuneEngine.output["elements"] = out[0]["output"];
+                RuneEngine.output["output"] = "${out[0]["output"]}";
+                print(">>IMAGE!!! ${RuneEngine.output}");
+                log?.sendLogs();
+                return RuneEngine.output;
+              }
+            }
             if (out.length == 2) {
-              if (out[0].containsKey("elements") &&
-                  out[1].containsKey("elements") &&
-                  out[0]["type_name"] == "utf8") {
+              if (out[0].containsKey("output") &&
+                  out[1].containsKey("output") &&
+                  out[0]["element_type"] == "UTF8") {
                 RuneEngine.output["type"] = "Image";
-                RuneEngine.output["output"] = ImageUtils.objectImage(
-                    out[1]["elements"], out[0]["elements"]);
-                RuneEngine.output["elements"] = out[0]["elements"];
+                RuneEngine.output["output"] =
+                    ImageUtils.objectImage(out[1]["output"], out[0]["output"]);
+                RuneEngine.output["elements"] = out[0]["output"];
+                log?.sendLogs();
                 return RuneEngine.output;
                 //image rec
               }

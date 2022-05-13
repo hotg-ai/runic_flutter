@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:runevm_fl/runevm_fl.dart';
+
 const CapabilitiesIds = {
   "RandCapability": 1,
   "AudioCapability": 2,
@@ -11,8 +13,9 @@ const CapabilitiesIds = {
 
 class RawCap {
   int type = CapabilitiesIds["RawCapability"]!;
-  Uint8List? raw;
+
   dynamic parameters;
+  Tensor inputTensor = new Tensor(Uint8List(0), [], TensorType.U8, 0);
 
   static String dataToString(Uint8List raw, String type) {
     try {
@@ -61,16 +64,15 @@ class RawCap {
     }
     if (type == CapabilitiesIds["RawCapability"]) {
       final bytesBuilder = BytesBuilder();
-      if (raw!.length > parameters["length"]) {
-        bytesBuilder.add(raw!.sublist(0, parameters["length"]));
+      if (inputTensor.bytes!.length > parameters["length"]) {
+        bytesBuilder.add(inputTensor.bytes!.sublist(0, parameters["length"]));
       } else {
-        bytesBuilder.add(raw!);
+        bytesBuilder.add(inputTensor.bytes!);
         while (bytesBuilder.length < parameters["length"]) {
           bytesBuilder.addByte(0);
         }
       }
-      raw = bytesBuilder.toBytes();
-      print(raw);
+      inputTensor.bytes = bytesBuilder.toBytes();
     }
   }
 }

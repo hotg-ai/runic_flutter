@@ -164,33 +164,18 @@ class Logs {
 
   sendLogs() async {
     List<dynamic> logs = (await RuneEngine.getLogs()).toList();
-    for (String log in logs) {
-      List<String> fields = "$log".split("@@");
-
-      if ("$log".contains("rune=")) {
+    for (dynamic log in logs) {
+      if (!kIsWeb) {
         try {
-          Map<dynamic, dynamic> jsonFields =
-              jsonDecode("${log.split("rune=")[1]}");
-          if (jsonFields.containsKey("message")) {
-            fields = [
-              jsonFields["level"],
-              jsonFields["target"],
-              jsonFields["message"]
-            ];
-            sendToSocket(jsonFields["message"], jsonFields["level"]);
+          if (log.containsKey("message")) {
+            print("SENDTOSOCKET");
+            sendToSocket(log["message"], log["level"]);
           }
         } catch (e) {}
-      }
-
-      if (kIsWeb) {
+      } else {
         try {
           Map<dynamic, dynamic> jsonFields = jsonDecode("$log");
           if (jsonFields.containsKey("message")) {
-            fields = [
-              jsonFields["level"],
-              jsonFields["target"],
-              jsonFields["message"]
-            ];
             print("jsonFields $jsonFields");
             sendToSocket(jsonFields["message"], jsonFields["level"]);
           }
@@ -209,10 +194,10 @@ class Logs {
           }
         } catch (e) {}
       }*/
-      LogLevel level = LogLevel.info;
-      if (fields[0] == "Error") {
-        sendToSocket(fields[2], fields[0]);
-      }
+      //LogLevel level = LogLevel.info;
+      //if (fields[0] == "Error") {
+      //  sendToSocket(fields[2], fields[0]);
+      //}
     }
   }
 }

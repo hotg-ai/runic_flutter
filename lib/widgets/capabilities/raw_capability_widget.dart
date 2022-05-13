@@ -54,7 +54,7 @@ class _RawCapabilityState extends State<RawCapabilityWidget> {
                               expands: true,
                               style: TextStyle(color: Colors.white),
                               onChanged: (String text) {
-                                widget.cap.raw =
+                                widget.cap.inputTensor.bytes =
                                     RawCap.stringToData(text, dataType);
                               },
                               controller: controller,
@@ -79,7 +79,7 @@ class _RawCapabilityState extends State<RawCapabilityWidget> {
                                 setState(() {
                                   dataType = "$newValue";
                                   controller.text = RawCap.dataToString(
-                                      widget.cap.raw!, dataType);
+                                      widget.cap.inputTensor.bytes!, dataType);
                                 });
                               },
                               items: <String>[
