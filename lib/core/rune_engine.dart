@@ -98,6 +98,8 @@ class RuneEngine {
       } else if (cap["type"] == "RawCapability") {
         RawCap rawCap = new RawCap();
         rawCap.parameters = cap;
+        rawCap.inputTensor.id = cap.containsKey("id") ? cap["id"] : 1;
+        rawCap.inputTensor.dimensions = [(cap["length"])];
         capabilities.add(rawCap);
       } else if (cap["type"] == "RandCapability") {
         RandCap randCap = new RandCap();
@@ -115,6 +117,10 @@ class RuneEngine {
                 ? cap["sample_duration_ms"]
                 : 1000);
         audioCap.parameters = cap;
+        audioCap.inputTensor.id = cap.containsKey("id") ? cap["id"] : 1;
+        audioCap.inputTensor.dimensions = [
+          ((cap["hz"] * cap["sample_duration_ms"] / 1000 * 2) as double).round()
+        ];
         capabilities.add(audioCap);
       }
     }
@@ -138,6 +144,7 @@ class RuneEngine {
       log?.sendTelemetryToSocket({"type": "rune/predict/started"});
 
       dynamic runeOutput = await RunevmFl.runRune();
+
       int time = DateTime.now().millisecondsSinceEpoch - start;
       if (runeOutput is String) {
         if (runeOutput.toLowerCase() == "error") {

@@ -46,6 +46,8 @@
 	<string>Device Info needed for model logging</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>App need microphone  access for audio input</string>
+	<key>NSMotionUsageDescription</key>
+	<string>App needs Motion data for Acceleration input to models</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>App needs photo library access for image input</string>
 	<key>UILaunchStoryboardName</key>

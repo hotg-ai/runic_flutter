@@ -241,5 +241,7 @@ class AudioCap extends RawCap {
   prepData() {
     super.prepData();
     this.raw = getStepBuffer();
+    this.inputTensor.bytes = getStepBuffer();
+    this.inputTensor.type = TensorType.U8;
   }
 }
