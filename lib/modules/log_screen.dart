@@ -19,19 +19,9 @@ class LogScreen extends StatefulWidget {
 }
 
 class _LogScreenState extends State<LogScreen> {
-  List<dynamic> logs = [];
   @override
   void initState() {
-    refreshLogs();
     super.initState();
-  }
-
-  void refreshLogs() async {
-    logs = (await RuneEngine.getLogs()).toList();
-    setState(() {});
-    Future.delayed(Duration(milliseconds: 500), () {
-      _controller.jumpTo(_controller.position.maxScrollExtent + 1000);
-    });
   }
 
   final _controller = ScrollController();
@@ -86,18 +76,18 @@ class _LogScreenState extends State<LogScreen> {
               padding: EdgeInsets.fromLTRB(21, 21, 21, 21),
               child: ListView.builder(
                   padding: EdgeInsets.zero,
-                  itemCount: logs.length + 1,
+                  itemCount: RuneEngine.logs.length + 1,
                   controller: _controller,
                   itemBuilder: (BuildContext ctxt, int index) {
-                    if (index == logs.length) {
+                    if (index == RuneEngine.logs.length) {
                       return Container(
                           height: 100,
                           child: Center(
                             child: IconButton(
                                 onPressed: () {
                                   String text = "";
-                                  for (String line in logs) {
-                                    text = text + line + "\n";
+                                  for (dynamic line in RuneEngine.logs) {
+                                    text = text + "$line\n";
                                   }
                                   Share.share(text);
                                 },
@@ -108,44 +98,40 @@ class _LogScreenState extends State<LogScreen> {
                                 )),
                           ));
                     }
-                    List<String> fields = "${logs[index]}".split("@@");
-                    if (fields.length < 3) {
+                    Map<String, dynamic> jsonFields = RuneEngine.logs[index];
+                    if (jsonFields.containsKey("message")) {
                       try {
-                        Map<dynamic, dynamic> jsonFields =
-                            jsonDecode("${logs[index]}");
-                        if (jsonFields.containsKey("message")) {
-                          return ListTile(
-                            visualDensity:
-                                VisualDensity(horizontal: 0, vertical: -4),
-                            contentPadding: EdgeInsets.all(0),
-                            minVerticalPadding: 0,
-                            dense: true,
-                            leading: Text(
-                              jsonFields["level"],
-                              maxLines: 2,
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  leadingDistribution:
-                                      TextLeadingDistribution.proportional,
-                                  //height: 1,
-                                  fontFamily: "Open sans",
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white),
-                            ),
-                            title: Container(
-                                child: Text(
-                              jsonFields["message"] +
-                                  " [${jsonFields["target"]}]",
-                              style: TextStyle(
-                                  fontSize: 10,
+                        return ListTile(
+                          visualDensity:
+                              VisualDensity(horizontal: 0, vertical: -4),
+                          contentPadding: EdgeInsets.all(0),
+                          minVerticalPadding: 0,
+                          dense: true,
+                          leading: Text(
+                            jsonFields["level"],
+                            maxLines: 2,
+                            style: TextStyle(
+                                fontSize: 10,
+                                leadingDistribution:
+                                    TextLeadingDistribution.proportional,
+                                //height: 1,
+                                fontFamily: "Open sans",
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          ),
+                          title: Container(
+                              child: Text(
+                            jsonFields["message"] +
+                                " [${jsonFields["target"]}]",
+                            style: TextStyle(
+                                fontSize: 10,
 
-                                  //height: 1,
-                                  fontFamily: "Open sans",
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white),
-                            )),
-                          );
-                        }
+                                //height: 1,
+                                fontFamily: "Open sans",
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white),
+                          )),
+                        );
                       } catch (e) {}
                       return Container();
                     }
@@ -154,8 +140,8 @@ class _LogScreenState extends State<LogScreen> {
                       contentPadding: EdgeInsets.all(0),
                       minVerticalPadding: 0,
                       dense: true,
-                      leading: Text(
-                        fields[0],
+                      title: Text(
+                        "${RuneEngine.logs[index]}",
                         maxLines: 2,
                         style: TextStyle(
                             fontSize: 10,
@@ -166,17 +152,6 @@ class _LogScreenState extends State<LogScreen> {
                             fontWeight: FontWeight.w700,
                             color: Colors.white),
                       ),
-                      title: Container(
-                          child: Text(
-                        fields[2] + " [${fields[1]}]",
-                        style: TextStyle(
-                            fontSize: 10,
-
-                            //height: 1,
-                            fontFamily: "Open sans",
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white),
-                      )),
                     );
                     /*return Container(
                         padding: EdgeInsets.fromLTRB(0, 0, 0, 0),

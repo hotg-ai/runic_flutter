@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/core/analytics.dart';
 import 'package:runic_flutter/core/logs.dart';
+import 'package:runic_flutter/core/models/yolo.dart';
 import 'package:runic_flutter/core/rune_graph.dart';
 import 'package:runic_flutter/utils/image_utils.dart';
 import 'package:runic_flutter/widgets/capabilities/audio_cap.dart';
@@ -26,29 +27,14 @@ class RuneEngine {
   static String? url;
 
   static Future<List<dynamic>> getLogs() async {
-    dynamic logs = await RunevmFl.getLogs();
+    logs = await RunevmFl.getLogs();
     return logs;
-  }
-
-  static bool isYoloModel() {
-    if (runeGraph != null) {
-      if (runeGraph!.parsed) {
-        if (runeGraph!.runeName.toLowerCase().contains("yolo")) {
-          return true;
-        }
-        if (runeGraph!.json.containsKey("models")) {
-          if (runeGraph!.json["models"].containsKey("yolo")) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
   }
 
   static getMeta(Uint8List bytes) {
     //parse the runeGraph from raw bytes
-    runeGraph = new RuneGraph(bytes);
+    print(">>>>RUNEGRAPH");
+    RuneEngine.runeGraph = new RuneGraph(bytes);
     RuneEngine.runeMeta["name"] = runeGraph?.runeName;
   }
 
@@ -170,88 +156,7 @@ class RuneEngine {
         "type": "String",
         "output": "no valid output type detected"
       };
-      List<String> names = [
-        'person',
-        'bicycle',
-        'car',
-        'motorcycle',
-        'airplane',
-        'bus',
-        'train',
-        'truck',
-        'boat',
-        'traffic light',
-        'fire hydrant',
-        'stop sign',
-        'parking meter',
-        'bench',
-        'bird',
-        'cat',
-        'dog',
-        'horse',
-        'sheep',
-        'cow',
-        'elephant',
-        'bear',
-        'zebra',
-        'giraffe',
-        'backpack',
-        'umbrella',
-        'handbag',
-        'tie',
-        'suitcase',
-        'frisbee',
-        'skis',
-        'snowboard',
-        'sports ball',
-        'kite',
-        'baseball bat',
-        'baseball glove',
-        'skateboard',
-        'surfboard',
-        'tennis racket',
-        'bottle',
-        'wine glass',
-        'cup',
-        'fork',
-        'knife',
-        'spoon',
-        'bowl',
-        'banana',
-        'apple',
-        'sandwich',
-        'orange',
-        'broccoli',
-        'carrot',
-        'hot dog',
-        'pizza',
-        'donut',
-        'cake',
-        'chair',
-        'couch',
-        'potted plant',
-        'bed',
-        'dining table',
-        'toilet',
-        'tv',
-        'laptop',
-        'mouse',
-        'remote',
-        'keyboard',
-        'cell phone',
-        'microwave',
-        'oven',
-        'toaster',
-        'sink',
-        'refrigerator',
-        'book',
-        'clock',
-        'vase',
-        'scissors',
-        'teddy bear',
-        'hair drier',
-        'toothbrush'
-      ];
+
       print(runeOutput.length);
       if (runeOutput is String) {
         outputLength = runeOutput.length;
@@ -282,7 +187,7 @@ class RuneEngine {
                 RuneEngine.output["type"] = "String";
                 RuneEngine.output["elements"] = out[0]["output"];
                 RuneEngine.output["output"] = "${out[0]["output"]}";
-                print(">>IMAGE!!! ${RuneEngine.output}");
+
                 log?.sendLogs();
                 return RuneEngine.output;
               }
@@ -300,24 +205,17 @@ class RuneEngine {
                 //image rec
               }
             }
-          } else if (out.containsKey("elements")) {
-            List<dynamic> outList = out["elements"];
-            if (isYoloModel()) {
-              RuneEngine.objects = [];
-              for (int i = 0; i < outList.length; i += 6) {
-                double confidence = outList[i + 4];
-                objects.add({
-                  "conf": confidence,
-                  "name": names[(outList[i + 5]).round()],
-                  "x": outList[i],
-                  "y": outList[i + 1],
-                  "w": outList[i + 2],
-                  "h": outList[i + 3]
-                });
-              }
+            if (YoloModel.isYoloModel(runeGraph)) {
+              RuneEngine.objects = YoloModel.getObjects(out[0]["output"]);
               RuneEngine.output["type"] = "Objects";
               RuneEngine.output["output"] = objects;
-            } else if (out["elements"].length > 5000) {
+              log?.sendLogs();
+              return RuneEngine.output;
+            }
+          } else if (out.containsKey("elements")) {
+            List<dynamic> outList = out["elements"];
+
+            if (out["elements"].length > 5000) {
               RuneEngine.output["type"] = "Image";
               RuneEngine.output["output"] =
                   ImageUtils.bytesRGBtoPNG(out["elements"]);
@@ -333,19 +231,8 @@ class RuneEngine {
         }
       } else if (runeOutput is List) {
         outputLength = runeOutput.length;
-        if (isYoloModel()) {
-          RuneEngine.objects = [];
-          for (int i = 0; i < runeOutput.length; i += 6) {
-            double confidence = runeOutput[i + 4];
-            objects.add({
-              "conf": confidence,
-              "name": names[(runeOutput[i + 5]).round()],
-              "x": runeOutput[i],
-              "y": runeOutput[i + 1],
-              "w": runeOutput[i + 2],
-              "h": runeOutput[i + 3]
-            });
-          }
+        if (YoloModel.isYoloModel(runeGraph)) {
+          RuneEngine.objects = YoloModel.getObjects(runeOutput);
           RuneEngine.output["type"] = "Objects";
           RuneEngine.output["output"] = objects;
         } else {

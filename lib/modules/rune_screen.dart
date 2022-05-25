@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/rune_engine.dart';
+import 'package:runic_flutter/modules/graph_screen.dart';
 import 'package:runic_flutter/modules/log_screen.dart';
 import 'package:runic_flutter/modules/result_screen.dart';
 import 'package:runic_flutter/utils/error_screen.dart';
@@ -362,7 +363,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
                               Container(
                                 width: 20,
                               ),
-                              Expanded(child: feedBackWidget())
+                              Expanded(child: detailsWidget())
                             ]));
                       }
 
@@ -390,7 +391,7 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
     ]);
   }
 
-  Widget feedBackWidget() {
+  Widget detailsWidget() {
     return Container(
       height: 42,
       margin: EdgeInsets.only(top: 11, bottom: 11),
@@ -416,11 +417,14 @@ class _RuneScreenState extends State<RuneScreen> with TickerProviderStateMixin {
       child: RawMaterialButton(
         elevation: 4.0,
         child: new Text(
-          'Send Feedback',
+          'Rune Details',
           style: TextStyle(fontSize: 16, color: Colors.white),
         ),
         onPressed: () {
-          showFeedBack();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => GraphScreen()),
+          );
         },
       ),
     );
