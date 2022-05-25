@@ -1,10 +1,10 @@
 import 'dart:async';
-
 import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
+import 'package:runevm_fl/runevm_fl.dart';
 import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
 import 'package:mic_stream/mic_stream.dart';
-//import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 
 const updateFrequency = 3;
 
@@ -27,34 +27,48 @@ class AudioCap extends RawCap {
   int bits = 16;
   List _streamSubscriptions = [];
   bool recording = false;
+
   AudioCap({this.hz = 16000, this.ms = 1000}) {
     length = (this.hz / this.ms * 1000).round();
     totalLength = length * 3;
     selectedPos = length;
     initRecord();
-  }
-/*
-  html.MediaStream? _localStream;
-  initWeb() async {
-    final mediaConstraints = <String, dynamic>{'audio': true, 'video': false};
-
-    try {
-      var stream = await html.window.navigator.mediaDevices!
-          .getUserMedia(mediaConstraints);
-      _localStream = stream;
-      final audio = _localStream!.getAudioTracks().first;
-      html.MediaRecorder record = new html.MediaRecorder(_localStream!);
-      record.start();
-    } catch (e) {
-      print(e.toString());
+    if (kIsWeb) {
+      RunevmFl.initMic();
     }
-  }*/
+  }
+
+  initWeb() async {
+    recording = true;
+
+    millisecondStarted = DateTime.now().millisecondsSinceEpoch;
+    Function check = (Function check) async {
+      milliseconds =
+          (DateTime.now().millisecondsSinceEpoch - millisecondStarted);
+      update();
+      await new Future.delayed(Duration(milliseconds: 50));
+
+      if (recording) {
+        check(check);
+      }
+    };
+    new Future.delayed(Duration(milliseconds: 50), () {
+      check(check);
+    });
+    dynamic output = await RunevmFl.decode(this.ms * 3);
+    recording = false;
+    print(output.length);
+    decodeF32List(List<double>.from(output));
+    update();
+  }
 
   initRecord() async {
-    stream = await MicStream.microphone(
-        sampleRate: 16000,
-        channelConfig: ChannelConfig.CHANNEL_IN_MONO,
-        audioFormat: AudioFormat.ENCODING_PCM_16BIT);
+    if (!kIsWeb) {
+      stream = await MicStream.microphone(
+          sampleRate: 16000,
+          channelConfig: ChannelConfig.CHANNEL_IN_MONO,
+          audioFormat: AudioFormat.ENCODING_PCM_16BIT);
+    } else {}
   }
 
   int bitcount = 0;
@@ -62,78 +76,136 @@ class AudioCap extends RawCap {
   int measurements = 0;
 
   stopRecording() async {
-    for (StreamSubscription<List<int>> streamSub in _streamSubscriptions) {
-      await streamSub.cancel();
+    if (kIsWeb) {
+    } else {
+      for (StreamSubscription<List<int>> streamSub in _streamSubscriptions) {
+        await streamSub.cancel();
+      }
     }
+
     recording = false;
     update();
   }
 
   int milliseconds = 0;
   startRecording() async {
-    bitcount = 0;
-    millisecondStarted = 0;
-    recording = true;
+    if (kIsWeb) {
+      bitcount = 0;
+      millisecondStarted = 0;
+      recording = true;
+      update();
+      _buffer = [];
+      initWeb();
+    } else {
+      bitcount = 0;
+      millisecondStarted = 0;
+      recording = true;
 
-    update();
-    _buffer = [];
+      update();
+      _buffer = [];
 
-    bits = await MicStream.bitDepth!;
-    for (StreamSubscription<List<int>> streamSub in _streamSubscriptions) {
-      await streamSub.cancel();
+      bits = await MicStream.bitDepth!;
+      for (StreamSubscription<List<int>> streamSub in _streamSubscriptions) {
+        await streamSub.cancel();
+      }
+      if (stream != null) {
+        _streamSubscriptions.add(stream?.listen((List<int> samples) async {
+          decodeStream(samples);
+        }));
+      }
     }
-    if (stream != null) {
-      _streamSubscriptions.add(stream?.listen((List<int> samples) async {
-        measurements++;
+  }
 
-        if (millisecondStarted == 0) {
-          millisecondStarted = DateTime.now().millisecondsSinceEpoch;
-        }
-        List<int> stream = to16bit(samples);
-        bitcount += stream.length;
-        milliseconds =
-            (DateTime.now().millisecondsSinceEpoch - millisecondStarted);
-        double sampleRateCalc = bitcount / milliseconds * 1000;
-        double maxDifference = 5000;
-        if ((sampleRateCalc - 16000).abs() < maxDifference) {
-          maxDifference = (sampleRateCalc - 16000).abs();
-          sampleRate = 16000;
-        }
-        if ((sampleRateCalc - 32000).abs() < maxDifference) {
-          maxDifference = (sampleRateCalc - 32000).abs();
-          sampleRate = 32000;
-        }
-        if ((sampleRateCalc - 48000).abs() < maxDifference) {
-          maxDifference = (sampleRateCalc - 48000).abs();
-          sampleRate = 48000;
-        }
-        print("$sampleRateCalc $sampleRate");
-        if (sampleRate == 48000) {
-          for (int i = 2; i < stream.length; i += 3) {
-            _buffer
-                .add(((stream[i - 2] + stream[i - 1] + stream[i]) / 3).round());
-          }
-        }
-        if (sampleRate == 32000) {
-          for (int i = 1; i < stream.length; i += 2) {
-            _buffer.add(((stream[i - 1] + stream[i]) / 2).round());
-          }
-        }
-        if (sampleRate == 16000) {
-          _buffer.addAll(stream);
-        }
+  decodeF32List(List<double> data) {
+    int amp = 20000;
+    List<int> stream = [];
+    for (int i = 0; i < data.length; i++) {
+      stream.add((data[i] * amp).round());
+    }
+    double sampleRateCalc = data.length / (this.ms * 3) * 1000;
+    double maxDifference = 5000;
+    if ((sampleRateCalc - 16000).abs() < maxDifference) {
+      maxDifference = (sampleRateCalc - 16000).abs();
+      sampleRate = 16000;
+    }
+    if ((sampleRateCalc - 32000).abs() < maxDifference) {
+      maxDifference = (sampleRateCalc - 32000).abs();
+      sampleRate = 32000;
+    }
+    if ((sampleRateCalc - 48000).abs() < maxDifference) {
+      maxDifference = (sampleRateCalc - 48000).abs();
+      sampleRate = 48000;
+    }
+    print("sampleRate $sampleRateCalc $sampleRate");
+    if (sampleRate == 48000) {
+      for (int i = 2; i < stream.length; i += 3) {
+        _buffer.add(((stream[i - 2] + stream[i - 1] + stream[i]) / 3).round());
+      }
+    }
+    if (sampleRate == 32000) {
+      for (int i = 1; i < stream.length; i += 2) {
+        _buffer.add(((stream[i - 1] + stream[i]) / 2).round());
+      }
+    }
+    if (sampleRate == 16000) {
+      _buffer.addAll(stream);
+    }
 
-        if (_buffer.length > this.totalLength) {
-          _buffer = _buffer.sublist(_buffer.length - this.totalLength);
-          this.stopRecording();
-        }
-        if (_buffer.length < this.totalLength) {
-          //_buffer.insert(0, 0);
-        }
-        if (measurements % updateFrequency == 0) {
-          update();
-        }
-      }));
+    if (_buffer.length > this.totalLength) {
+      _buffer = _buffer.sublist(_buffer.length - this.totalLength);
+    }
+    while (_buffer.length < this.totalLength) {
+      _buffer.add(0);
+    }
+  }
+
+  decodeStream(List<int> samples) {
+    measurements++;
+
+    if (millisecondStarted == 0) {
+      millisecondStarted = DateTime.now().millisecondsSinceEpoch;
+    }
+    List<int> stream = to16bit(samples);
+    bitcount += stream.length;
+    milliseconds = (DateTime.now().millisecondsSinceEpoch - millisecondStarted);
+    double sampleRateCalc = bitcount / milliseconds * 1000;
+    double maxDifference = 5000;
+    if ((sampleRateCalc - 16000).abs() < maxDifference) {
+      maxDifference = (sampleRateCalc - 16000).abs();
+      sampleRate = 16000;
+    }
+    if ((sampleRateCalc - 32000).abs() < maxDifference) {
+      maxDifference = (sampleRateCalc - 32000).abs();
+      sampleRate = 32000;
+    }
+    if ((sampleRateCalc - 48000).abs() < maxDifference) {
+      maxDifference = (sampleRateCalc - 48000).abs();
+      sampleRate = 48000;
+    }
+    print("$sampleRateCalc $sampleRate");
+    if (sampleRate == 48000) {
+      for (int i = 2; i < stream.length; i += 3) {
+        _buffer.add(((stream[i - 2] + stream[i - 1] + stream[i]) / 3).round());
+      }
+    }
+    if (sampleRate == 32000) {
+      for (int i = 1; i < stream.length; i += 2) {
+        _buffer.add(((stream[i - 1] + stream[i]) / 2).round());
+      }
+    }
+    if (sampleRate == 16000) {
+      _buffer.addAll(stream);
+    }
+
+    if (_buffer.length > this.totalLength) {
+      _buffer = _buffer.sublist(_buffer.length - this.totalLength);
+      this.stopRecording();
+    }
+    if (_buffer.length < this.totalLength) {
+      //_buffer.insert(0, 0);
+    }
+    if (measurements % updateFrequency == 0) {
+      update();
     }
   }
 
@@ -144,11 +216,6 @@ class AudioCap extends RawCap {
   }
 
   Uint8List getStepBuffer() {
-    //while (_buffer.length < this.totalLength) {
-    //  _buffer.add(0);
-    //}
-    print(
-        "sending buffer from $selectedPos, ${selectedPos + length} , ${_buffer.length} ${_buffer.sublist(selectedPos, selectedPos + length).length}");
     return Int16List.fromList(
             _buffer.sublist(selectedPos, selectedPos + length))
         .buffer
@@ -156,11 +223,17 @@ class AudioCap extends RawCap {
   }
 
   List<int> getBuffer() {
+    int window = 20;
     List<int> fullBuffer = [];
-    while (_buffer.length + fullBuffer.length < this.totalLength) {
+    while (_buffer.length + fullBuffer.length * window - this.totalLength < 0) {
       fullBuffer.add(0);
     }
-    fullBuffer.addAll(_buffer);
+    for (int i = window; i < _buffer.length; i = i + window) {
+      double sum = 0.0;
+      _buffer.sublist(i - window, i).forEach((e) => sum += e);
+      fullBuffer.add((sum / window).round());
+    }
+
     return fullBuffer;
   }
 
@@ -168,5 +241,7 @@ class AudioCap extends RawCap {
   prepData() {
     super.prepData();
     this.raw = getStepBuffer();
+    this.inputTensor.bytes = getStepBuffer();
+    this.inputTensor.type = TensorType.U8;
   }
 }

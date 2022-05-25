@@ -1,0 +1,6 @@
+framework module ai_barcode {
+  umbrella header "ai_barcode-umbrella.h"
+
+  export *
+  module * { export * }
+}

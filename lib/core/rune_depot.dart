@@ -47,13 +47,14 @@ class RuneDepot {
   }
 
   static Future<bool> checkCache(List<dynamic> meta) async {
+    //disable cache
+
     await check();
     List<String> keys = List<String>.from(runeDB!.keys);
-    print("keys: $keys");
     for (dynamic rune in meta) {
       String uuid = "${rune["name"]}_${rune["version"]}";
-      rune["cached"] = keys.contains(uuid);
-      print("$uuid ${rune["cached"]}");
+      //rune["cached"] = keys.contains(uuid);
+      rune["cached"] = false;
     }
 
     return false;

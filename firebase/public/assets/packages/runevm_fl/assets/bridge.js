@@ -16,7 +16,7 @@ class RuneCapability {
     cap_id = 0;
     type=-1;
     constructor(cap_id,manifest,data,type) {
-
+        console.log("cap",cap_id,manifest,data,type);
         this.manifest = manifest;
         this.cap_id = cap_id;
         this.data = data;
@@ -27,10 +27,14 @@ class RuneCapability {
     }
     setParameter(key, value) {
         this.parameters[key] = value;
+        
         if(this.manifest.length<=this.cap_id) {
+            
             this.manifest[this.cap_id]={"type":capabilitiesDefinition[this.type]};
+            
         }
         this.manifest[this.cap_id][key] = value;
+        console.log(this.manifest)
     }
  }
 
@@ -53,6 +57,8 @@ class Bridge {
         console.log("bridge loaded");
     }
     
+
+
     async call(bytes,lengths) {
      
         logs=[]; 
@@ -95,6 +101,8 @@ class Bridge {
  
         return JSON.stringify(this.manifest);
     }
+   
+
 
     async getLogs() {
         return logs;
@@ -102,3 +110,12 @@ class Bridge {
 }
 
 bridge = new Bridge();
+/*
+    //helpers
+    //async decodeAAC(bytes) {
+        //let audioCtx =  new AudioContext();
+        //let view = new Uint8Array(bytes);
+        //let audioBuffer = await audioCtx.decodeAudioData(view.buffer);
+        //return 0;
+    //}
+*/

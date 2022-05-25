@@ -18,7 +18,6 @@ class HFAuth {
   static bool isLoggedIn = false;
   static bool asked = false;
   static init() async {
-    print(">>>>>>initLogin");
     String data = await rootBundle.loadString("assets/auth.json");
     final Map<String, dynamic> auth = jsonDecode(data);
     auth0Domain = auth["AUTH0_DOMAIN"];

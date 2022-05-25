@@ -2,8 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/hf_auth.dart';
 import 'package:runic_flutter/core/logs.dart';
@@ -18,6 +20,7 @@ import 'package:runic_flutter/widgets/background.dart';
 import 'package:blur/blur.dart';
 import 'package:runic_flutter/widgets/barcode_scanner.dart';
 import 'package:runic_flutter/widgets/main_menu.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -43,6 +46,67 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       searchList = Registry.runes;
     });
+  }
+
+  void showDownload() async {
+    if (kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
+      SnackBar snackBar = SnackBar(
+          elevation: 0,
+          duration: Duration(seconds: 4),
+          backgroundColor: Colors.transparent,
+          content: Container(
+              height: 240,
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: Container(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 130),
+                  child: Stack(children: [
+                    Container(
+                      width: double.infinity,
+                    ),
+                    Blur(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      child: Container(
+                        width: double.infinity,
+                      ),
+                      colorOpacity: 0.2,
+                    ),
+                    Center(
+                      child: ListTile(
+                        onTap: () async {
+                          String url = defaultTargetPlatform ==
+                                  TargetPlatform.android
+                              ? "https://play.google.com/store/apps/details?id=ai.hotg.runicapp&hl=en_US&gl=US"
+                              : "https://apps.apple.com/be/app/runic-by-hotg-ai/id1550831458";
+                          await canLaunch(url)
+                              ? await launch(url, forceSafariVC: false)
+                              : throw 'Could not launch $url';
+                        },
+                        trailing: Image.asset(
+                          defaultTargetPlatform == TargetPlatform.iOS ||
+                                  defaultTargetPlatform == TargetPlatform.macOS
+                              ? "assets/images/btn-apple.png"
+                              : "assets/images/btn-google.png",
+                          width: 100,
+                        ),
+                        title: Text(
+                          "Download Runic App",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                            "By downloading our test app you can test out the models live on the edge! Both on IOS and Android",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w300)),
+                      ),
+                    )
+                  ]))));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 
   void login() async {
@@ -74,11 +138,13 @@ class _HomeScreenState extends State<HomeScreen> {
     urlTextController.text = result;
   }
 
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
       Background(),
       Scaffold(
+        key: scaffoldKey,
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           elevation: 0,
@@ -87,36 +153,42 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.transparent,
           leading: Container(),
           title: Text(
-            'Welcome To the Rune Tinyverse',
+            'Welcome To the Runic Mobile App',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           actions: [
-            IconButton(
+            /*IconButton(
                 icon: Image.asset(
                   "assets/images/icons/notification.png",
                   width: 16,
                 ),
-                onPressed: () {}),
-            Center(
-                child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  gradient: LinearGradient(
-                    begin: Alignment.centerRight,
-                    end: Alignment.centerLeft,
-                    colors: [
-                      barneyPurpleColor.withAlpha(150),
-                      indigoBlueColor.withAlpha(150),
-                    ],
-                  )),
-              width: 30,
-              height: 30,
-              child: IconButton(
-                  icon: Icon(Icons.segment, size: 16),
-                  splashColor: Colors.white,
-                  splashRadius: 21,
-                  onPressed: () {}),
-            )),
+                onPressed: () {
+                  //Navigator.pushNamed(context, "history");
+                }),*/
+            kIsWeb
+                ? Center(
+                    child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.centerRight,
+                          end: Alignment.centerLeft,
+                          colors: [
+                            barneyPurpleColor.withAlpha(150),
+                            indigoBlueColor.withAlpha(150),
+                          ],
+                        )),
+                    width: 30,
+                    height: 30,
+                    child: IconButton(
+                        icon: Icon(Icons.download, size: 16),
+                        splashColor: Colors.white,
+                        splashRadius: 21,
+                        onPressed: () {
+                          showDownload();
+                        }),
+                  ))
+                : Container(),
             Container(
               width: 10,
             )
@@ -148,9 +220,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       maxWidth: 36,
                                       minWidth: 36,
                                       maxHeight: 36),
-                                  suffixIcon: Container(
+                                  suffixIcon: IconButton(
+                                      onPressed: () {
+                                        Clipboard.getData(Clipboard.kTextPlain)
+                                            .then((value) {
+                                          if (value != null) {
+                                            if (value.text != null) {
+                                              urlTextController.text =
+                                                  value.text!;
+                                              setState(() {});
+                                            }
+                                          }
+                                          //value is clipbarod data
+                                        });
+                                      },
                                       padding: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                                      child: Image.asset(
+                                      icon: Image.asset(
                                         "assets/images/icons/paste.png",
                                         height: 14,
                                       )),
@@ -167,15 +252,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           RawMaterialButton(
                             fillColor: whiteAlpha.withAlpha(30),
                             constraints: BoxConstraints(),
-                            onPressed: () {
-                              Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              BarcodeScanner(qrCodeResult)))
-                                  .then((value) {
-                                //notifyParent();
-                              });
+                            onPressed: () async {
+                              if (!kIsWeb) {
+                                if (await Permission.camera
+                                    .request()
+                                    .isGranted) {
+                                  Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BarcodeScanner(qrCodeResult)))
+                                      .then((value) {
+                                    //notifyParent();
+                                  });
+                                }
+                              } else {
+                                Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                BarcodeScanner(qrCodeResult)))
+                                    .then((value) {
+                                  //notifyParent();
+                                });
+                              }
                             },
                             elevation: 0.0,
                             //fillColor: whiteAlpha,
@@ -219,6 +319,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     onPressed: () async {
+                      Registry.onUpdate = (int bytesIn, int totalBytes) {
+                        _loadingProgress =
+                            "${bytesIn > totalBytes ? 100 : (bytesIn / totalBytes * 100).round()}%";
+                        _loadingDescription = "${(bytesIn / 1000).round()}Kb";
+                        setState(() {});
+                      };
                       setState(() {
                         _loading = true;
                       });
@@ -354,8 +460,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _loading = true;
                               });
                               if (searchList[index]["cached"]) {
-                                RuneEngine.runeBytes = (await RuneDepot.getRune(
-                                    "${searchList[index]["name"]}_${searchList[index]["version"]}"))!;
+                                try {
+                                  RuneEngine.runeBytes = (await RuneDepot.getRune(
+                                      "${searchList[index]["name"]}_${searchList[index]["version"]}"))!;
+                                } catch (e) {
+                                  setState(() {
+                                    _loading = false;
+                                    return;
+                                  });
+                                }
+
                                 RuneEngine.runeMeta = searchList[index];
                               } else {
                                 Registry.onUpdate =

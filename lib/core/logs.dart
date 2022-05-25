@@ -27,10 +27,10 @@ class Logs {
   static String socketIOUrl = "https://dev-socket.hotg.ai";
   static IO.Socket? socket;
   static String? visitorID;
-  static int? projectID = 0;
+  static String? projectID = "0";
   static String? userName;
 
-  init(int newProjectID, String url) async {
+  init(String newProjectID, String url, [env = "prd"]) async {
     IO.cache.clear();
 
     //if (projectID == newProjectID) {
@@ -38,10 +38,10 @@ class Logs {
     //} else {
     projectID = newProjectID;
     socketIOUrl = "https://socket.hotg.ai";
-    if (url.contains("https://dev-")) {
+    if (url.contains("https://dev-") || env == "dev") {
       socketIOUrl = "https://dev-socket.hotg.ai";
     }
-    if (url.contains("https://stg-")) {
+    if (url.contains("https://stg-") || env == "stg") {
       socketIOUrl = "https://stg-socket.hotg.ai";
     }
     //}
@@ -77,7 +77,7 @@ class Logs {
     socket!
         .onConnectTimeout((data) => {print("SocketIO ConnectTimeout  $data")});
     socket!.on('event', (data) {
-      print("DATA SEND>>>>>>>>>>>$data");
+      //print("DATA SEND>>>>>>>>>>>$data");
     });
     socket!.onDisconnect((_) => print('disconnect'));
     socket!.on('fromServer', (_) => print(_));
@@ -89,9 +89,7 @@ class Logs {
           "name": userName,
           "type": getDeviceType()
         };
-        print("##### registering device on $projectID $deviceInfo");
-        print("##### registering device on $projectID $deviceInfo");
-        print("##### registering device on $projectID $deviceInfo");
+
         socket!.emit("register_device_$projectID", deviceInfo);
         print("Connected to server");
         print(deviceInfo);
@@ -106,7 +104,7 @@ class Logs {
   void disconnect() {
     if (socket != null) {
       if (socket!.connected) {
-        projectID = 0;
+        projectID = "0";
         socket!.disconnect();
         //socket!.close();
         //socket!.dispose();
@@ -117,14 +115,14 @@ class Logs {
 
   bool isConnected() {
     if (socket != null) {
-      if (socket!.connected && projectID! > 0) {
+      if (socket!.connected && projectID! != "0") {
         return true;
       }
     }
     return false;
   }
 
-  heartBeat(int project) {
+  heartBeat(String project) {
     if (socket!.connected && projectID == project) {
       socket!.emit("heartbeat_$projectID", {"deviceId": visitorID});
       new Future.delayed(const Duration(milliseconds: heartBeatInterval), () {
@@ -141,7 +139,8 @@ class Logs {
     if (socket == null) {
       return;
     }
-    if (socket!.connected && projectID! > 0) {
+
+    if (socket!.connected && projectID! != "0") {
       print(
           "project_log_message_$projectID deviceId: $visitorID, method: $level, message: $data}");
       socket!.emit("project_log_message_$projectID",
@@ -165,19 +164,19 @@ class Logs {
 
   sendLogs() async {
     List<dynamic> logs = (await RuneEngine.getLogs()).toList();
-    for (String log in logs) {
-      List<String> fields = "$log".split("@@");
-
-      if ("$log".contains("rune=")) {
+    for (dynamic log in logs) {
+      if (!kIsWeb) {
         try {
-          Map<dynamic, dynamic> jsonFields =
-              jsonDecode("${log.split("rune=")[1]}");
+          if (log.containsKey("message")) {
+            print("SENDTOSOCKET");
+            sendToSocket(log["message"], log["level"]);
+          }
+        } catch (e) {}
+      } else {
+        try {
+          Map<dynamic, dynamic> jsonFields = jsonDecode("$log");
           if (jsonFields.containsKey("message")) {
-            fields = [
-              jsonFields["level"],
-              jsonFields["target"],
-              jsonFields["message"]
-            ];
+            print("jsonFields $jsonFields");
             sendToSocket(jsonFields["message"], jsonFields["level"]);
           }
         } catch (e) {}
@@ -195,10 +194,10 @@ class Logs {
           }
         } catch (e) {}
       }*/
-      LogLevel level = LogLevel.info;
-      if (fields[0] == "Error") {
-        sendToSocket(fields[2], fields[0]);
-      }
+      //LogLevel level = LogLevel.info;
+      //if (fields[0] == "Error") {
+      //  sendToSocket(fields[2], fields[0]);
+      //}
     }
   }
 }

@@ -1,14 +1,13 @@
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/widgets/capabilities/raw_cap.dart';
 
-class RawCapabilityWidget extends StatelessWidget {
+class RawCapabilityWidget extends StatefulWidget {
   final Function() notifyParent;
   final RawCap cap;
   final single;
-  final TextEditingController controller = new TextEditingController();
-
   RawCapabilityWidget(
       {Key? key,
       required this.cap,
@@ -16,30 +15,18 @@ class RawCapabilityWidget extends StatelessWidget {
       this.single = true})
       : super(key: key);
 
-  String utf8toString(Uint8List raw) {
-    return utf8.decode(raw);
-  }
+  @override
+  _RawCapabilityState createState() => _RawCapabilityState();
+}
 
-  Uint8List stringToUtf8(String text) {
-    List<int> out = List.from(utf8.encode(text));
-    print(out);
-    if (out.length > 1500) {
-      return Uint8List.fromList(out.sublist(0, 1500));
-    } else {
-      while (out.length < 1500) {
-        out.add(0);
-      }
-    }
-    return Uint8List.fromList(out);
-  }
+class _RawCapabilityState extends State<RawCapabilityWidget> {
+  String dataType = "UTF8";
+  final TextEditingController controller = new TextEditingController();
 
   final FocusNode inputFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
-    if (cap.raw != null) {
-      controller.text = utf8toString(cap.raw!);
-    }
     return new Column(children: [
       new Card(
           shape: RoundedRectangleBorder(
@@ -58,20 +45,55 @@ class RawCapabilityWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16.0),
                   child: Container(
                       color: Colors.white.withAlpha(30),
-                      padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
+                      padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
                       child: Stack(children: [
                         Container(
+                            padding: EdgeInsets.fromLTRB(0, 0, 55, 0),
                             child: TextField(
-                          focusNode: inputFocusNode,
-                          expands: true,
-                          style: TextStyle(color: Colors.white),
-                          onChanged: (String text) {
-                            cap.raw = stringToUtf8(text);
-                          },
-                          controller: controller,
-                          //keyboardType: TextInputType.,
-                          maxLines: null,
-                        )),
+                              focusNode: inputFocusNode,
+                              expands: true,
+                              style: TextStyle(color: Colors.white),
+                              onChanged: (String text) {
+                                widget.cap.inputTensor.bytes =
+                                    RawCap.stringToData(text, dataType);
+                              },
+                              controller: controller,
+                              //keyboardType: TextInputType.,
+                              maxLines: null,
+                            )),
+                        Positioned(
+                            right: 0,
+                            top: 0,
+                            width: 60,
+                            child: DropdownButton<String>(
+                              value: dataType,
+                              //icon: const Icon(Icons.arrow_downward),
+                              elevation: 0,
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 12),
+                              underline: Container(
+                                height: 1,
+                                color: Colors.white,
+                              ),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  dataType = "$newValue";
+                                  controller.text = RawCap.dataToString(
+                                      widget.cap.inputTensor.bytes!, dataType);
+                                });
+                              },
+                              items: <String>[
+                                'UTF8',
+                                'ASCII',
+                                'U8',
+                                'F32'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            )),
                         Positioned(
                             right: 0,
                             bottom: 0,

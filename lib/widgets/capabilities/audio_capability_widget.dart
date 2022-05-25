@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:runic_flutter/widgets/capabilities/audio_cap.dart';
@@ -22,13 +23,19 @@ class AudioCapabilityWidget extends StatefulWidget {
 
 class _AudioCapabilityWidgetState extends State<AudioCapabilityWidget> {
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     widget.cap.update = () {
       setState(() {});
       if (!widget.cap.recording) {
         widget.run(true);
       }
     };
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return new Column(children: [
       new Card(
           shape: RoundedRectangleBorder(
@@ -152,7 +159,7 @@ class _AudioCapabilityWidgetState extends State<AudioCapabilityWidget> {
                           },
                         )),
                   ])),
-            )
+            ),
           ]))
     ]);
   }

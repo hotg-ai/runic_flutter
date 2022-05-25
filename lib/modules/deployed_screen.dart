@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:runic_flutter/config/theme.dart';
 import 'package:runic_flutter/core/logs.dart';
 import 'package:runic_flutter/core/registry.dart';
@@ -148,15 +150,30 @@ class _DeployedScreenState extends State<DeployedScreen> {
                           RawMaterialButton(
                             fillColor: whiteAlpha.withAlpha(30),
                             constraints: BoxConstraints(),
-                            onPressed: () {
-                              Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              BarcodeScanner(qrCodeResult)))
-                                  .then((value) {
-                                //notifyParent();
-                              });
+                            onPressed: () async {
+                              if (!kIsWeb) {
+                                if (await Permission.camera
+                                    .request()
+                                    .isGranted) {
+                                  Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BarcodeScanner(qrCodeResult)))
+                                      .then((value) {
+                                    //notifyParent();
+                                  });
+                                }
+                              } else {
+                                Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                BarcodeScanner(qrCodeResult)))
+                                    .then((value) {
+                                  //notifyParent();
+                                });
+                              }
                             },
                             elevation: 0.0,
                             //fillColor: whiteAlpha,

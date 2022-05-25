@@ -1,0 +1,39 @@
+{
+  "name": "runevm_fl",
+  "version": "0.0.1",
+  "summary": "RuneVM for flutter plugin",
+  "description": "RuneVM for flutter plugin",
+  "homepage": "http://hotg.ai",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Hammer Of The Gods": "admin@hotg.ai"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "Flutter": [
+
+    ]
+  },
+  "platforms": {
+    "ios": "12.1"
+  },
+  "public_header_files": "Classes/**/*.h",
+  "xcconfig": {
+    "LIBRARY_SEARCH_PATHS": "\"${PODS_TARGET_SRCROOT}/ios/install-ios-rel/lib/\"",
+    "HEADER_SEARCH_PATHS": "\"${PODS_TARGET_SRCROOT}/ios/install-ios-rel/include/\" \"${PODS_TARGET_SRCROOT}/ios/Classes/\"",
+    "CLANG_CXX_LANGUAGE_STANDARD": "c++17",
+    "CLANG_CXX_LIBRARY": "libc++"
+  },
+  "vendored_libraries": "install-ios-rel/lib/*.a",
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES",
+    "ENABLE_BITCODE": "NO"
+  },
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
+}

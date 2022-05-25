@@ -16,7 +16,7 @@ class RuneGraph {
   List<ProcBlock> procBlocks = [];
   List<Output> outputs = [];
   Map<String, Tensor> tensors = {};
-
+  List<String> connections = [];
   RuneGraph(this.bytes) {
     parsed = false;
     if (bytes.length > 1000 * 1000 * 50) {
@@ -64,8 +64,6 @@ class RuneGraph {
           try {
             String s = new String.fromCharCodes(
                 bytes.sublist(i + runeGraphBytes.length, endPos));
-            print(s);
-            print(s.length);
 
             json = jsonDecode(s);
 
@@ -124,6 +122,7 @@ class RuneGraph {
       }
     }
     dynamic outputsObject = parse(json, "outputs");
+
     if (outputsObject != null) {
       for (String key in outputsObject.keys) {
         Output output = new Output();
@@ -133,18 +132,19 @@ class RuneGraph {
         outputs.add(output);
       }
     }
+
     dynamic tensorObject = parse(json, "tensors");
     if (tensorObject != null) {
       for (String key in tensorObject.keys) {
+        connections.add(key);
         Tensor tensor = new Tensor();
         tensor.name = key;
-        tensor.elementType = parse(tensorObject[key], "element_type");
+        tensor.elementType =
+            parse(tensorObject[key], "element_type").toString();
         tensor.dimensions = parse(tensorObject[key], "dimensions");
         tensors[key] = tensor;
       }
     }
-    print(
-        "$runeName >>> $capabilities >>> $procBlocks >>> $outputs >>> $tensors");
   }
 
   dynamic parse(dynamic data, String key) {
@@ -176,6 +176,7 @@ class ProcBlock {
   Map<String, dynamic>? args;
   List<String>? inputs;
   List<String>? outputs;
+  bool preModel = false;
 }
 
 class Output {
@@ -183,10 +184,20 @@ class Output {
   dynamic kind;
   List<String>? inputs;
   List<String>? outputs;
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "$name,$kind,$inputs,$outputs";
+  }
 }
 
 class Tensor {
   String? name;
   String? elementType;
   List<dynamic>? dimensions;
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "$name,$elementType,$dimensions";
+  }
 }

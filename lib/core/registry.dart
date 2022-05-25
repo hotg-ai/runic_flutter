@@ -15,20 +15,32 @@ class Registry {
   };
   static Future<Uint8List?> downloadWASM(String urlString, [Logs? logs]) async {
     try {
-      final decoded = Uri.decodeFull(urlString);
-      List<String> parts = decoded.split("#project_id=");
+      String decoded = Uri.decodeFull(urlString);
+      decoded = decoded.replaceAll("https://runic2.web.app/?url=", "");
+      String env = "prd";
+      if (decoded.contains("&env=dev")) {
+        env = "dev";
+        decoded = decoded.replaceAll('&env=dev', "");
+      }
+      if (decoded.contains("&env=stg")) {
+        env = "stg";
+        decoded = decoded.replaceAll('&env=stg', "");
+      }
+      urlString = decoded;
+      List<String> parts = urlString.split("#project_id=");
       if (parts.length == 2) {
         urlString = parts[0];
-        int? projectID = int.tryParse(parts[1]);
-        if (projectID != null) logs?.init(projectID, urlString);
+        String? projectID = parts[1];
+        if (projectID != null) logs?.init(projectID, urlString, env);
       } else {
         List<String> parts = urlString.split("&project_id=");
         if (parts.length == 2) {
           urlString = parts[0];
-          int? projectID = int.tryParse(parts[1]);
-          if (projectID != null) logs?.init(projectID, urlString);
+          String? projectID = parts[1];
+          if (projectID != "0") logs?.init(projectID, urlString, env);
         }
       }
+      onUpdate(0, 1);
       final url = Uri.parse(urlString.trim());
       final client = http.Client();
       final request = http.Request('GET', url);
@@ -43,6 +55,11 @@ class Registry {
           "message": response.reasonPhrase,
           "milliseconds": totalTime.toString(),
         });
+        return null;
+      }
+
+      if (response.contentLength! < 10000) {
+        return null;
       }
       if (response.contentLength! > 50000000) {
         return await response.stream.toBytes();

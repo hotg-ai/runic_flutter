@@ -29,18 +29,10 @@
   <title>Runic.js</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" type="text/css" href="styles.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"></script>
+
+
+
   <script src="plugins/jsQR.js" type="application/javascript"></script>
-          <!-- Adds the WebGL backend to the global backend registry -->
-          <!--<script src="https://rune-registry.web.app/vm/runevm.js"></script>-->
-          <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-
-          <!-- Adds the WebGL backend to the global backend registry -->
-          <!-- Adds the WASM backend to the global backend registry -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script>
-             
-  <script src="https://rune-registry.web.app/vm2/browser.js"></script>
-
 </head>
 <body style="background-color: #18141E;">
   <img src="icons/loading.svg" width="60%" class="center" id="splash"/>
@@ -49,7 +41,7 @@
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
-    var serviceWorkerVersion = '4202780279';
+    var serviceWorkerVersion = '1592491314';
     var scriptLoaded = false;
     function loadMainDartJs() {
       if (scriptLoaded) {
@@ -117,5 +109,38 @@
       loadMainDartJs();
     }
   </script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyC70fDkk-1RwSkzVBtLaS3MT79TOMkp6ZY",
+      authDomain: "runic2.firebaseapp.com",
+      projectId: "runic2",
+      storageBucket: "runic2.appspot.com",
+      messagingSenderId: "852385900016",
+      appId: "1:852385900016:web:81980005469f40ee6c6935",
+      measurementId: "G-Y149PK4211"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+            <!-- Adds the WebGL backend to the global backend registry -->
+          <!--<script src="https://rune-registry.web.app/vm/runevm.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+
+<!-- Adds the WebGL backend to the global backend registry -->
+<!-- Adds the WASM backend to the global backend registry -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script>
+   
+<script src="https://rune-registry.web.app/vm2/browser.js" type="module"></script>
+<script src="plugins/audio.js"></script>
 </body>
 </html>
